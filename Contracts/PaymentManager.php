@@ -12,7 +12,7 @@ namespace Juzaweb\Modules\Payment\Contracts;
 
 interface PaymentManager
 {
-    public function registerDriver(string $name, callable $resolver): void;
+    public function registerDriver(string $name, string $resolver): void;
 
     public function registerModule(string $name, ModuleHandlerInterface $handler): void;
 }

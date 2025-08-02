@@ -69,10 +69,12 @@ class PaymentManager implements Contracts\PaymentManager
 
         $handler->cancel($paymentHistory->paymentable);
 
+        event(new PaymentFail($paymentHistory->paymentable));
+
         return true;
     }
 
-    public function registerDriver(string $name, callable $resolver): void
+    public function registerDriver(string $name, string $resolver): void
     {
         if (isset($this->drivers[$name])) {
             throw new InvalidArgumentException("Payment driver [$name] already registered.");
