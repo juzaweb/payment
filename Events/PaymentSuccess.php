@@ -14,7 +14,7 @@ use Juzaweb\Modules\Payment\Contracts\Paymentable;
 
 class PaymentSuccess
 {
-    public function __construct(public Paymentable $paymentable)
+    public function __construct(public Paymentable $paymentable, public array $params)
     {
     }
 }

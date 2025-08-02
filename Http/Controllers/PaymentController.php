@@ -45,12 +45,12 @@ class PaymentController extends ThemeController
         return $this->failResponse();
     }
 
-    public function complete(Request $request, string $module, string $transactionId)
+    public function return(Request $request, string $module, string $paymentHistoryId)
     {
         try {
             $payment = DB::transaction(
-                function () use ($request, $transactionId) {
-                    $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
+                function () use ($request, $paymentHistoryId) {
+                    $paymentHistory = PaymentHistory::lockForUpdate()->find($paymentHistoryId);
 
                     throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 

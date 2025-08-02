@@ -14,6 +14,7 @@ use InvalidArgumentException;
 use Juzaweb\Core\Models\User;
 use Juzaweb\Modules\Payment\Contracts;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
+use Juzaweb\Modules\Payment\Events\PaymentCancel;
 use Juzaweb\Modules\Payment\Events\PaymentFail;
 use Juzaweb\Modules\Payment\Events\PaymentSuccess;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
@@ -37,7 +38,22 @@ class PaymentManager implements Contracts\PaymentManager
 
         throw_if($paymentMethod == null, PaymentException::make(__('Payment method not found!')));
 
-        $purchase = $this->driver($paymentMethod->driver, $paymentMethod->getConfig())->purchase(
+        $paymentHistory = new PaymentHistory(
+            [
+                'payment_method' => $method,
+                'module' => $module,
+                'status' => PaymentHistoryStatus::PROCESSING,
+            ]
+        );
+
+        $paymentHistory->payer()->associate($user);
+        $paymentHistory->save();
+
+        $config = $paymentMethod->getConfig();
+        $config['returnUrl'] = route('payment.return', [$module, $paymentHistory->id]);
+        $config['cancelUrl'] = route('payment.cancel', [$module, $paymentHistory->id]);
+
+        $purchase = $this->driver($paymentMethod->driver, $config)->purchase(
             [
                 'amount' => $order->getTotalAmount(),
                 'currency' => $order->getCurrency(),
@@ -45,29 +61,16 @@ class PaymentManager implements Contracts\PaymentManager
             ]
         );
 
-        $paymentHistory = new PaymentHistory(
-            [
-                'payment_method' => $method,
-                'module' => $module,
-                'status' => PaymentHistoryStatus::PROCESSING,
-                'payment_id' => $purchase->getTransactionId(),
-            ]
-        );
-
-        $paymentHistory->payer()->associate($user);
+        $paymentHistory->fill(['payment_id' => $purchase->getTransactionId()]);
         $paymentHistory->paymentable()->associate($order);
         $paymentHistory->save();
 
         if ($purchase->isSuccessful()) {
-            $handler->success($order);
+            $handler->success($order, $params);
 
-            $paymentHistory->update(
-                [
-                    'status' => PaymentHistoryStatus::SUCCESS,
-                ]
-            );
+            $paymentHistory->update(['status' => PaymentHistoryStatus::SUCCESS]);
 
-            event(new PaymentSuccess($paymentHistory->paymentable));
+            event(new PaymentSuccess($paymentHistory->paymentable, $params));
         }
 
         return $purchase;
@@ -86,7 +89,7 @@ class PaymentManager implements Contracts\PaymentManager
         $response = $gateway->complete($params);
 
         if ($response->isSuccessful()) {
-            $handler->success($paymentHistory->paymentable);
+            $handler->success($paymentHistory->paymentable, $params);
 
             $paymentHistory->update(
                 [
@@ -94,9 +97,9 @@ class PaymentManager implements Contracts\PaymentManager
                 ]
             );
 
-            event(new PaymentSuccess($paymentHistory->paymentable));
+            event(new PaymentSuccess($paymentHistory->paymentable, $params));
         } else {
-            $handler->fail($paymentHistory->paymentable);
+            $handler->fail($paymentHistory->paymentable, $params);
 
             $paymentHistory->update(
                 [
@@ -104,7 +107,7 @@ class PaymentManager implements Contracts\PaymentManager
                 ]
             );
 
-            event(new PaymentFail($paymentHistory->paymentable));
+            event(new PaymentFail($paymentHistory->paymentable, $params));
         }
 
         return $response;
@@ -114,9 +117,9 @@ class PaymentManager implements Contracts\PaymentManager
     {
         $handler = $this->getModule($module);
 
-        $handler->cancel($paymentHistory->paymentable);
+        $handler->cancel($paymentHistory->paymentable, $params);
 
-        event(new PaymentFail($paymentHistory->paymentable));
+        event(new PaymentCancel($paymentHistory->paymentable, $params));
 
         return true;
     }
@@ -144,9 +147,6 @@ class PaymentManager implements Contracts\PaymentManager
         if (!isset($this->drivers[$name])) {
             throw new InvalidArgumentException("Payment driver [$name] not registered.");
         }
-
-        $config['returnUrl'] = $config['returnUrl'] ?? url("/payment/{$name}/complete");
-        $config['cancelUrl'] = $config['cancelUrl'] ?? url("/payment/{$name}/cancel");
 
         return app($this->drivers[$name], ['config' => $config]);
     }

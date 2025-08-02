@@ -13,15 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('payment_methods', function (Blueprint $table) {
-            $table->id();
-            $table->string('driver', 50)->index();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->json('config')->nullable();
-            $table->boolean('active')->default(true);
-            $table->timestamps();
-        });
+        Schema::create(
+            'payment_methods',
+            function (Blueprint $table) {
+                $table->id();
+                $table->string('driver', 50)->index();
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->json('config')->nullable();
+                $table->boolean('active')->default(true);
+                $table->timestamps();
+            }
+        );
     }
 
     /**

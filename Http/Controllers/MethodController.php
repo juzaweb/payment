@@ -8,13 +8,14 @@
  * @license    GNU V2
  */
 
-namespace Juzaweb\Modules\Payment\Events;
+namespace Juzaweb\Modules\Payment\Http\Controllers;
 
-use Juzaweb\Modules\Payment\Contracts\Paymentable;
+use Juzaweb\Core\Http\Controllers\AdminController;
 
-class PaymentFail
+class MethodController extends AdminController
 {
-    public function __construct(public Paymentable $paymentable, public array $params)
+    public function index()
     {
+
     }
 }

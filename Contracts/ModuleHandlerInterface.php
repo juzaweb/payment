@@ -16,9 +16,9 @@ interface ModuleHandlerInterface
 {
     public function createOrder(array $params): Paymentable;
 
-    public function fail(Paymentable $paymentable): void;
+    public function fail(Paymentable $paymentable, array $params): void;
 
-    public function success(Paymentable $paymentable): void;
+    public function success(Paymentable $paymentable, array $params): void;
 
-    public function cancel(Paymentable $paymentable): void;
+    public function cancel(Paymentable $paymentable, array $params): void;
 }
