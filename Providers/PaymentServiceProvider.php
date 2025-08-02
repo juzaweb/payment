@@ -27,7 +27,7 @@ class PaymentServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->singleton(
