@@ -5,68 +5,61 @@ namespace Juzaweb\Modules\Payment\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Juzaweb\Core\Http\Controllers\ThemeController;
+use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
+use Juzaweb\Modules\Payment\Facades\PaymentManager;
 use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
-use Juzaweb\Modules\Payment\Services\PaymentManager;
 
 class PaymentController extends ThemeController
 {
-    public function purchase(PaymentRequest $request, string $module, string $method)
+    public function purchase(PaymentRequest $request, string $module)
     {
         $user = $request->user();
+        $method = $request->post('method');
         $paymentMethod = PaymentMethod::where('driver', $method)
             ->where('active', true)
             ->first();
 
         abort_if($paymentMethod == null, 404, __('Payment method not found!'));
 
-        $paymentHistory = new PaymentHistory(
-            [
-                'payment_method' => $method,
-                'status' => 'processing',
-                'module' => $module,
-            ]
-        );
-
-        $paymentHistory->payer()->associate($user);
-
-        $paymentHistory->save();
-
         try {
             $payment = DB::transaction(
-                fn () => PaymentManager::create($module, $paymentMethod)
+                function () use ($module, $paymentMethod, $request, $user, $method) {
+                    $paymentHistory = new PaymentHistory(
+                        [
+                            'payment_method' => $method,
+                            'status' => PaymentHistoryStatus::PROCESSING,
+                            'module' => $module,
+                        ]
+                    );
+
+                    $paymentHistory->payer()->associate($user);
+
+                    $paymentHistory->save();
+
+                    return PaymentManager::create($module, $paymentMethod, $request->all());
+                }
             );
         } catch (PaymentException $e) {
-            return $this->restFail($e->getMessage());
+            return $this->error($e->getMessage());
         }
 
         if ($payment->isSuccessful()) {
-            return $this->restSuccess(
-                [
-                    'type' => 'complete',
-                    'transaction_id' => $payment->transactionId,
-                    'status' => $payment->status,
-                    'module' => $module,
-                ],
-                __('Payment successful!')
-            );
+            return $this->success(__('Payment successful!'));
         }
 
-        if ($payment->isRedirect) {
-            return $this->restSuccess(
+        if ($payment->isRedirect()) {
+            return $this->success(
                 [
                     'type' => 'redirect',
                     'redirect_url' => $payment->getRedirectUrl(),
-                    'status' => $payment->status,
-                    'module' => $module,
-                ],
-                __('Redirecting...')
+                ]
             );
         }
 
-        return $this->failResponse($payment);
+        return $this->failResponse();
     }
 
     public function complete(Request $request, string $module, string $transactionId): JsonResponse
@@ -125,9 +118,9 @@ class PaymentController extends ThemeController
         );
     }
 
-    protected function failResponse(PaymentResult $result): JsonResponse
+    protected function failResponse()
     {
-        return $this->restFail(
+        return $this->error(
             __('Sorry, there was an error processing your payment. Please try again later.')
         );
     }

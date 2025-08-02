@@ -12,7 +12,6 @@ namespace Juzaweb\Modules\Payment\Services;
 
 use InvalidArgumentException;
 use Juzaweb\Modules\Payment\Contracts;
-use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
 class PaymentManager implements Contracts\PaymentManager
@@ -21,7 +20,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     protected array $modules = [];
 
-    public function create(string $module, PaymentMethod $method)
+    public function create(string $module, PaymentMethod $method, array $params): PurchaseResult
     {
         if (!isset($this->modules[$module])) {
             throw new InvalidArgumentException("Payment module [$module] not registered.");
@@ -32,12 +31,17 @@ class PaymentManager implements Contracts\PaymentManager
             throw new InvalidArgumentException("Payment module [$module] does not implement ModuleHandlerInterface.");
         }
 
-        $handler->purchase($method);
-        $gateway = $this->driver($method->driver, $method->getConfig());
+        $order = $handler->createOrder($params);
 
-        return $gateway->purchase($params);
+        return $this->driver($method->driver, $method->getConfig())->purchase(
+            [
+                'amount' => $order->getTotalAmount(),
+                'currency' => $order->getCurrency(),
+                // 'description'   => 'This is a test purchase transaction.',
+            ]
+        );
     }
-    
+
     public function registerDriver(string $name, callable $resolver): void
     {
         if (isset($this->drivers[$name])) {
@@ -56,12 +60,15 @@ class PaymentManager implements Contracts\PaymentManager
         $this->modules[$name] = $handler;
     }
 
-    public function driver(string $name, array $config): PaymentGatewayInterface
+    public function driver(string $name, array $config): Contracts\PaymentGatewayInterface
     {
         if (!isset($this->drivers[$name])) {
             throw new InvalidArgumentException("Payment driver [$name] not registered.");
         }
 
-        return app($this->drivers[$name], ['config' => $this->drivers[$name]]);
+        $config['returnUrl'] = $config['returnUrl'] ?? url("/payment/{$name}/complete");
+        $config['cancelUrl'] = $config['cancelUrl'] ?? url("/payment/{$name}/cancel");
+
+        return app($this->drivers[$name], ['config' => $config]);
     }
 }

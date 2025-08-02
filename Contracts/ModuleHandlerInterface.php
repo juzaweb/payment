@@ -12,7 +12,9 @@ namespace Juzaweb\Modules\Payment\Contracts;
 
 interface ModuleHandlerInterface
 {
-    public function purchase(Request $request, string $transactionId, Method $method): PurchaseResult;
+    public function createOrder(array $params): Paymentable;
 
-    public function success(PaymentResult $result): void;
+    // public function success(Paymentable $paymentable): void;
+
+    // public function cancel(Paymentable $paymentable): void;
 }

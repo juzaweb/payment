@@ -27,6 +27,11 @@ class PayPal implements PaymentGatewayInterface
     {
         $response = $this->createGateway()->purchase($params)->send();
 
+        return PurchaseResult::make(
+            $response->getTransactionReference(),
+            $response->getRedirectUrl(),
+            $response->getData()
+        )->setSuccessful($response->isSuccessful());
     }
 
     public function return(): mixed

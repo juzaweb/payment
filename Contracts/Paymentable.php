@@ -12,5 +12,9 @@ namespace Juzaweb\Modules\Payment\Contracts;
 
 interface Paymentable
 {
+    public function getTotalAmount(): float;
 
+    public function getCurrency(): string;
+
+    public function getDescription(): string;
 }

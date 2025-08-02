@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
+use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 
 class PaymentHistory extends Model
 {
@@ -24,6 +25,11 @@ class PaymentHistory extends Model
         'payment_id',
         'paymentable_type',
         'paymentable_id',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
+        'status' => PaymentHistoryStatus::class,
     ];
 
     public function paymentMethod(): BelongsTo
