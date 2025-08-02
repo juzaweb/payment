@@ -3,6 +3,7 @@
 namespace Juzaweb\Modules\Payment\Providers;
 
 use Juzaweb\Core\Providers\ServiceProvider;
+use Juzaweb\Modules\Payment\Contracts\PaymentManager;
 
 class PaymentServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,13 @@ class PaymentServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(
+            PaymentManager::class,
+            function ($app) {
+                return new \Juzaweb\Modules\Payment\PaymentManager();
+            }
+        );
     }
 
     /**
@@ -38,9 +46,9 @@ class PaymentServiceProvider extends ServiceProvider
     protected function registerConfig(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/config.php' => config_path('payment.php'),
+            __DIR__ . '/../config/payment.php' => config_path('payment.php'),
         ], 'config');
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'payment');
+        $this->mergeConfigFrom(__DIR__ . '/../config/payment.php', 'payment');
     }
 
     /**
