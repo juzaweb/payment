@@ -56,11 +56,12 @@ class PaymentManager implements Contracts\PaymentManager
 
         $paymentHistory->payer()->associate($user);
         $paymentHistory->paymentable()->associate($order);
+        $paymentHistory->save();
 
         if ($purchase->isSuccessful()) {
             $handler->success($order);
-            
-            $paymentHistory->fill(
+
+            $paymentHistory->update(
                 [
                     'status' => PaymentHistoryStatus::SUCCESS,
                 ]
@@ -68,8 +69,6 @@ class PaymentManager implements Contracts\PaymentManager
 
             event(new PaymentSuccess($paymentHistory->paymentable));
         }
-
-        $paymentHistory->save();
 
         return $purchase;
     }
