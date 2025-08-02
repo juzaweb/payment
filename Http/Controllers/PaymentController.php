@@ -3,18 +3,40 @@
 namespace Juzaweb\Modules\Payment\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Juzaweb\Core\Http\Controllers\ThemeController;
+use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
+use Juzaweb\Modules\Payment\Models\PaymentHistory;
+use Juzaweb\Modules\Payment\Models\PaymentMethod;
+use Juzaweb\Modules\Payment\Services\PaymentManager;
 
 class PaymentController extends ThemeController
 {
-    public function purchase(PaymentRequest $request, string $module): JsonResponse
+    public function purchase(PaymentRequest $request, string $module, string $method)
     {
-        $method = Payment::method($request->input('method'));
+        $user = $request->user();
+        $paymentMethod = PaymentMethod::where('driver', $method)
+            ->where('active', true)
+            ->first();
+
+        abort_if($paymentMethod == null, 404, __('Payment method not found!'));
+
+        $paymentHistory = new PaymentHistory(
+            [
+                'payment_method' => $method,
+                'status' => 'processing',
+                'module' => $module,
+            ]
+        );
+
+        $paymentHistory->payer()->associate($user);
+
+        $paymentHistory->save();
 
         try {
             $payment = DB::transaction(
-                fn () => Payment::create($request, $module, $method)
+                fn () => PaymentManager::create($module, $paymentMethod)
             );
         } catch (PaymentException $e) {
             return $this->restFail($e->getMessage());

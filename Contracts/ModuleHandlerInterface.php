@@ -10,9 +10,9 @@
 
 namespace Juzaweb\Modules\Payment\Contracts;
 
-interface PaymentManager
+interface ModuleHandlerInterface
 {
-    public function registerDriver(string $name, callable $resolver): void;
+    public function purchase(Request $request, string $transactionId, Method $method): PurchaseResult;
 
-    public function registerModule(string $name, ModuleHandlerInterface $handler): void;
+    public function success(PaymentResult $result): void;
 }
