@@ -18,28 +18,11 @@ class PaymentController extends ThemeController
     {
         $user = $request->user();
         $method = $request->post('method');
-        $paymentMethod = PaymentMethod::where('driver', $method)
-            ->where('active', true)
-            ->first();
-
-        abort_if($paymentMethod == null, 404, __('Payment method not found!'));
 
         try {
             $payment = DB::transaction(
-                function () use ($module, $paymentMethod, $request, $user, $method) {
-                    $paymentHistory = new PaymentHistory(
-                        [
-                            'payment_method' => $method,
-                            'status' => PaymentHistoryStatus::PROCESSING,
-                            'module' => $module,
-                        ]
-                    );
-
-                    $paymentHistory->payer()->associate($user);
-
-                    $paymentHistory->save();
-
-                    return PaymentManager::create($module, $paymentMethod, $request->all());
+                function () use ($module, $request, $user, $method) {
+                    return PaymentManager::create($user, $module, $method, $request->all());
                 }
             );
         } catch (PaymentException $e) {

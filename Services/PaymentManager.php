@@ -11,9 +11,12 @@
 namespace Juzaweb\Modules\Payment\Services;
 
 use InvalidArgumentException;
+use Juzaweb\Core\Models\User;
 use Juzaweb\Modules\Payment\Contracts;
+use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 use Juzaweb\Modules\Payment\Events\PaymentFail;
 use Juzaweb\Modules\Payment\Events\PaymentSuccess;
+use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
@@ -23,19 +26,49 @@ class PaymentManager implements Contracts\PaymentManager
 
     protected array $modules = [];
 
-    public function create(string $module, PaymentMethod $method, array $params): PurchaseResult
+    public function create(User $user, string $module, string $method, array $params): PurchaseResult
     {
         $handler = $this->getModule($module);
-
         $order = $handler->createOrder($params);
 
-        return $this->driver($method->driver, $method->getConfig())->purchase(
+        $paymentMethod = PaymentMethod::where('driver', $method)
+            ->where('active', true)
+            ->first();
+
+        throw_if($paymentMethod == null, PaymentException::make(__('Payment method not found!')));
+
+        $purchase = $this->driver($paymentMethod->driver, $paymentMethod->getConfig())->purchase(
             [
                 'amount' => $order->getTotalAmount(),
                 'currency' => $order->getCurrency(),
                 'description' => $order->getPaymentDescription(),
             ]
         );
+
+        $paymentHistory = new PaymentHistory(
+            [
+                'payment_method' => $method,
+                'module' => $module,
+                'status' => PaymentHistoryStatus::PROCESSING,
+                'payment_id' => $purchase->getTransactionId(),
+            ]
+        );
+
+        $paymentHistory->payer()->associate($user);
+
+        if ($purchase->isSuccessful()) {
+            $paymentHistory->fill(
+                [
+                    'status' => PaymentHistoryStatus::SUCCESS,
+                ]
+            );
+
+            $paymentHistory->paymentable()->associate($order);
+        }
+
+        $paymentHistory->save();
+
+        return $purchase;
     }
 
     public function complete(string $module, PaymentHistory $paymentHistory, array $params): CompleteResult

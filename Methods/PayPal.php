@@ -46,12 +46,7 @@ class PayPal implements PaymentGatewayInterface
         );
     }
 
-    public function return(): mixed
-    {
-        // TODO: Implement redirect() method.
-    }
-
-    public function handleWebhook(array $data): mixed
+    public function handleWebhook(array $data): void
     {
         // TODO: Implement handleWebhook() method.
     }

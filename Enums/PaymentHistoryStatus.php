@@ -13,7 +13,7 @@ namespace Juzaweb\Modules\Payment\Enums;
 enum PaymentHistoryStatus: string
 {
     case PENDING = 'pending';
-    case COMPLETED = 'completed';
+    case SUCCESS = 'success';
     case FAILED = 'failed';
     case CANCELLED = 'cancelled';
     case PROCESSING = 'processing';

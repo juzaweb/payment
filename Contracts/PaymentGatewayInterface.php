@@ -10,13 +10,14 @@
 
 namespace Juzaweb\Modules\Payment\Contracts;
 
+use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 
 interface PaymentGatewayInterface
 {
     public function purchase(array $params): PurchaseResult;
 
-    public function return(): mixed;
+    public function complete(array $params): CompleteResult;
 
-    public function handleWebhook(array $data): mixed;
+    public function handleWebhook(array $data): void;
 }
