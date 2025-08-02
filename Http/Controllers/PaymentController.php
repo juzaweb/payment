@@ -62,7 +62,7 @@ class PaymentController extends ThemeController
         return $this->failResponse();
     }
 
-    public function complete(Request $request, string $module, string $transactionId): JsonResponse
+    public function complete(Request $request, string $module, string $transactionId)
     {
         try {
             $payment = DB::transaction(
@@ -71,51 +71,35 @@ class PaymentController extends ThemeController
 
                     throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 
-                    throw_if($paymentHistory->status !== PaymentHistory::STATUS_PROCESSING, new PaymentException(__('Transaction has been processed!')));
+                    throw_if($paymentHistory->status !== PaymentHistoryStatus::PROCESSING, new PaymentException(__('Transaction has been processed!')));
 
-                    return Payment::complete($request, $paymentHistory);
+                    return PaymentManager::complete($paymentHistory, $request->all());
                 }
             );
         } catch (PaymentException $e) {
-            return $this->restFail($e->getMessage());
+            return $this->error($e->getMessage());
         }
 
         if ($payment->isSuccessful()) {
-            return $this->restSuccess(
-                [
-                    'type' => 'complete',
-                    'transaction_id' => $transactionId,
-                    'status' => $payment->status,
-                    'module' => $module,
-                ],
-                __('Payment successful!')
-            );
+            return $this->success(__('Payment successful!'));
         }
 
-        return $this->failResponse($payment);
+        return $this->failResponse();
     }
 
-    public function cancel(Request $request, string $module, string $transactionId): JsonResponse
+    public function cancel(Request $request, string $module, string $transactionId)
     {
         try {
             $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
 
-            abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
+            abort_if($paymentHistory == null, 404, __('Transaction not found!'));
 
-            $payment = DB::transaction(fn () => Payment::cancel($request, $paymentHistory));
+            $payment = DB::transaction(fn () => PaymentManager::cancel($module, $paymentHistory, $request->all()));
         } catch (PaymentException $e) {
-            return $this->restFail($e->getMessage());
+            return $this->error($e->getMessage());
         }
 
-        return $this->restSuccess(
-            [
-                'type' => 'cancel',
-                'transaction_id' => $transactionId,
-                'status' => $payment->status,
-                'module' => $module,
-            ],
-            __('Payment canceled!')
-        );
+        return $this->success(__('Payment canceled!'));
     }
 
     protected function failResponse()

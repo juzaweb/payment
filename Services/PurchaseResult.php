@@ -17,18 +17,6 @@ class PurchaseResult extends PaymentResult
      */
     protected ?string $redirectUrl = null;
 
-    /**
-     * @var string|null
-     */
-    protected ?string $transactionId = null;
-
-    /**
-     * @var array
-     */
-    protected array $data = [];
-
-    protected bool $isSuccessful = false;
-
     public static function make(string $transactionId, string $redirectUrl = null, array $data = []): static
     {
         return new self($transactionId, $redirectUrl, $data);
@@ -39,30 +27,6 @@ class PurchaseResult extends PaymentResult
         $this->transactionId = $transactionId;
         $this->redirectUrl = $redirectUrl;
         $this->data = $data;
-    }
-
-    public function setSuccessful(bool $isSuccessful): self
-    {
-        $this->isSuccessful = $isSuccessful;
-
-        return $this;
-    }
-
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    public function setData(array $data): self
-    {
-        $this->data = $data;
-
-        return $this;
-    }
-
-    public function isSuccessful(): bool
-    {
-        return $this->isSuccessful;
     }
 
     public function isRedirect(): bool
@@ -80,17 +44,5 @@ class PurchaseResult extends PaymentResult
     public function getRedirectUrl(): ?string
     {
         return $this->redirectUrl;
-    }
-
-    public function setTransactionId(string $transactionId): self
-    {
-        $this->transactionId = $transactionId;
-
-        return $this;
-    }
-
-    public function getTransactionId(): ?string
-    {
-        return $this->transactionId;
     }
 }

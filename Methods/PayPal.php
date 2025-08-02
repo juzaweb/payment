@@ -11,6 +11,7 @@
 namespace Juzaweb\Modules\Payment\Methods;
 
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
+use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Omnipay;
@@ -32,6 +33,17 @@ class PayPal implements PaymentGatewayInterface
             $response->getRedirectUrl(),
             $response->getData()
         )->setSuccessful($response->isSuccessful());
+    }
+
+    public function complete(array $params): CompleteResult
+    {
+        $response = $this->createGateway()->completePurchase($params)->send();
+
+        return CompleteResult::make(
+            $response->getTransactionReference(),
+            $response->isSuccessful(),
+            $response->getData()
+        );
     }
 
     public function return(): mixed

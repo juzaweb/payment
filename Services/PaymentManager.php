@@ -12,6 +12,9 @@ namespace Juzaweb\Modules\Payment\Services;
 
 use InvalidArgumentException;
 use Juzaweb\Modules\Payment\Contracts;
+use Juzaweb\Modules\Payment\Events\PaymentFail;
+use Juzaweb\Modules\Payment\Events\PaymentSuccess;
+use Juzaweb\Modules\Payment\Models\PaymentHistory;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
 class PaymentManager implements Contracts\PaymentManager
@@ -22,14 +25,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     public function create(string $module, PaymentMethod $method, array $params): PurchaseResult
     {
-        if (!isset($this->modules[$module])) {
-            throw new InvalidArgumentException("Payment module [$module] not registered.");
-        }
-
-        $handler = $this->modules[$module];
-        if (!$handler instanceof Contracts\ModuleHandlerInterface) {
-            throw new InvalidArgumentException("Payment module [$module] does not implement ModuleHandlerInterface.");
-        }
+        $handler = $this->getModule($module);
 
         $order = $handler->createOrder($params);
 
@@ -37,9 +33,43 @@ class PaymentManager implements Contracts\PaymentManager
             [
                 'amount' => $order->getTotalAmount(),
                 'currency' => $order->getCurrency(),
-                // 'description'   => 'This is a test purchase transaction.',
+                'description' => $order->getPaymentDescription(),
             ]
         );
+    }
+
+    public function complete(string $module, PaymentHistory $paymentHistory, array $params): CompleteResult
+    {
+        $gateway = $this->driver($paymentHistory->paymentMethod->driver, $paymentHistory->paymentMethod->getConfig());
+
+        $handler = $this->getModule($module);
+
+        $params['transactionReference'] = $paymentHistory->payment_id;
+
+        unset($params['token']);
+
+        $response = $gateway->complete($params);
+
+        if ($response->isSuccessful()) {
+            $handler->success($paymentHistory->paymentable);
+
+            event(new PaymentSuccess($paymentHistory->paymentable));
+        } else {
+            $handler->fail($paymentHistory->paymentable);
+
+            event(new PaymentFail($paymentHistory->paymentable));
+        }
+
+        return $response;
+    }
+
+    public function cancel(string $module, PaymentHistory $paymentHistory, array $params): true
+    {
+        $handler = $this->getModule($module);
+
+        $handler->cancel($paymentHistory->paymentable);
+
+        return true;
     }
 
     public function registerDriver(string $name, callable $resolver): void
@@ -70,5 +100,14 @@ class PaymentManager implements Contracts\PaymentManager
         $config['cancelUrl'] = $config['cancelUrl'] ?? url("/payment/{$name}/cancel");
 
         return app($this->drivers[$name], ['config' => $config]);
+    }
+
+    public function getModule(string $module): Contracts\ModuleHandlerInterface
+    {
+        if (!isset($this->modules[$module])) {
+            throw new InvalidArgumentException("Payment module [$module] not registered.");
+        }
+
+        return $this->modules[$module];
     }
 }

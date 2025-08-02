@@ -10,11 +10,15 @@
 
 namespace Juzaweb\Modules\Payment\Contracts;
 
+use Juzaweb\Modules\Payment\Services\PaymentResult;
+
 interface ModuleHandlerInterface
 {
     public function createOrder(array $params): Paymentable;
 
-    // public function success(Paymentable $paymentable): void;
+    public function fail(Paymentable $paymentable): void;
 
-    // public function cancel(Paymentable $paymentable): void;
+    public function success(Paymentable $paymentable): void;
+
+    public function cancel(Paymentable $paymentable): void;
 }
