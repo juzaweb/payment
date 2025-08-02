@@ -7,5 +7,15 @@
             "name": "Juzaweb CMS",
             "email": "admin@juzaweb.com"
         }
-    ]
+    ],
+    "require": {
+        "league/omnipay": "^3",
+        "omnipay/paypal": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0.1",
+        "larabizcms/for-dev": "^1.0",
+        "larabizcms/gtranslate": "^1.0",
+        "juzaweb/core": "^1.0"
+    }
 }
