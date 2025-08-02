@@ -8,9 +8,10 @@
  * @license    GNU V2
  */
 
-namespace Juzaweb\Modules\Payment;
+namespace Juzaweb\Modules\Payment\Services;
 
 use InvalidArgumentException;
+use Juzaweb\Modules\Payment\Contracts;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 
 class PaymentManager implements Contracts\PaymentManager

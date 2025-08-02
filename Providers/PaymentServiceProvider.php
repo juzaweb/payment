@@ -33,7 +33,7 @@ class PaymentServiceProvider extends ServiceProvider
         $this->app->singleton(
             PaymentManager::class,
             function ($app) {
-                return new \Juzaweb\Modules\Payment\PaymentManager();
+                return new \Juzaweb\Modules\Payment\Services\PaymentManager();
             }
         );
     }

@@ -2,37 +2,111 @@
 
 namespace Juzaweb\Modules\Payment\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Juzaweb\Core\Http\Controllers\ThemeController;
+use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
 
-class PaymentController extends Controller
+class PaymentController extends ThemeController
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
-    public function index()
+    public function purchase(PaymentRequest $request, string $module): JsonResponse
     {
-        return view('payment::index');
+        $method = Payment::method($request->input('method'));
+
+        try {
+            $payment = DB::transaction(
+                fn () => Payment::create($request, $module, $method)
+            );
+        } catch (PaymentException $e) {
+            return $this->restFail($e->getMessage());
+        }
+
+        if ($payment->isSuccessful()) {
+            return $this->restSuccess(
+                [
+                    'type' => 'complete',
+                    'transaction_id' => $payment->transactionId,
+                    'status' => $payment->status,
+                    'module' => $module,
+                ],
+                __('Payment successful!')
+            );
+        }
+
+        if ($payment->isRedirect) {
+            return $this->restSuccess(
+                [
+                    'type' => 'redirect',
+                    'redirect_url' => $payment->getRedirectUrl(),
+                    'status' => $payment->status,
+                    'module' => $module,
+                ],
+                __('Redirecting...')
+            );
+        }
+
+        return $this->failResponse($payment);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+    public function complete(Request $request, string $module, string $transactionId): JsonResponse
     {
-        return view('payment::create');
+        try {
+            $payment = DB::transaction(
+                function () use ($request, $transactionId) {
+                    $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
+
+                    throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
+
+                    throw_if($paymentHistory->status !== PaymentHistory::STATUS_PROCESSING, new PaymentException(__('Transaction has been processed!')));
+
+                    return Payment::complete($request, $paymentHistory);
+                }
+            );
+        } catch (PaymentException $e) {
+            return $this->restFail($e->getMessage());
+        }
+
+        if ($payment->isSuccessful()) {
+            return $this->restSuccess(
+                [
+                    'type' => 'complete',
+                    'transaction_id' => $transactionId,
+                    'status' => $payment->status,
+                    'module' => $module,
+                ],
+                __('Payment successful!')
+            );
+        }
+
+        return $this->failResponse($payment);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
+    public function cancel(Request $request, string $module, string $transactionId): JsonResponse
     {
-        return view('payment::edit');
+        try {
+            $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
+
+            abort_if($paymentHistory == null, 404, __('Payment transaction not found!'));
+
+            $payment = DB::transaction(fn () => Payment::cancel($request, $paymentHistory));
+        } catch (PaymentException $e) {
+            return $this->restFail($e->getMessage());
+        }
+
+        return $this->restSuccess(
+            [
+                'type' => 'cancel',
+                'transaction_id' => $transactionId,
+                'status' => $payment->status,
+                'module' => $module,
+            ],
+            __('Payment canceled!')
+        );
+    }
+
+    protected function failResponse(PaymentResult $result): JsonResponse
+    {
+        return $this->restFail(
+            __('Sorry, there was an error processing your payment. Please try again later.')
+        );
     }
 }
