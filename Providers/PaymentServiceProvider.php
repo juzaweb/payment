@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Modules\Payment\Providers;
 
+use Juzaweb\Core\Facades\Menu;
 use Juzaweb\Core\Providers\ServiceProvider;
 use Juzaweb\Modules\Payment\Contracts\PaymentManager;
 
@@ -14,7 +15,11 @@ class PaymentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->booted(
+            function () {
+                $this->registerMenu();
+            }
+        );
     }
 
     /**
@@ -36,6 +41,12 @@ class PaymentServiceProvider extends ServiceProvider
                 return new \Juzaweb\Modules\Payment\Services\PaymentManager();
             }
         );
+    }
+
+    protected function registerMenu(): void
+    {
+        Menu::make('payment-methods', __('Payment Methods'))
+            ->parent('settings');
     }
 
     /**
