@@ -18,7 +18,7 @@ use Omnipay\Omnipay;
 
 class PayPal implements PaymentGatewayInterface
 {
-    protected string $driver = 'PayPal_Express';
+    protected string $driver = 'PayPal_Rest';
 
     public function __construct(protected array $config)
     {
@@ -54,6 +54,9 @@ class PayPal implements PaymentGatewayInterface
     protected function createGateway(): GatewayInterface
     {
         $gateway = Omnipay::create($this->driver);
+        if (isset($this->config['sandbox']) && $this->config['sandbox']) {
+            $gateway->setTestMode(true);
+        }
         $gateway->initialize($this->config);
         return $gateway;
     }

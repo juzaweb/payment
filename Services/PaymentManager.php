@@ -13,6 +13,7 @@ namespace Juzaweb\Modules\Payment\Services;
 use InvalidArgumentException;
 use Juzaweb\Core\Models\User;
 use Juzaweb\Modules\Payment\Contracts;
+use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 use Juzaweb\Modules\Payment\Events\PaymentCancel;
 use Juzaweb\Modules\Payment\Events\PaymentFail;
@@ -29,7 +30,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     public function create(User $user, string $module, string $method, array $params): PurchaseResult
     {
-        $handler = $this->getModule($module);
+        $handler = $this->module($module);
         $order = $handler->createOrder($params);
 
         $paymentMethod = PaymentMethod::where('driver', $method)
@@ -80,7 +81,7 @@ class PaymentManager implements Contracts\PaymentManager
     {
         $gateway = $this->driver($paymentHistory->paymentMethod->driver, $paymentHistory->paymentMethod->getConfig());
 
-        $handler = $this->getModule($module);
+        $handler = $this->module($module);
 
         $params['transactionReference'] = $paymentHistory->payment_id;
 
@@ -115,7 +116,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     public function cancel(string $module, PaymentHistory $paymentHistory, array $params): true
     {
-        $handler = $this->getModule($module);
+        $handler = $this->module($module);
 
         $handler->cancel($paymentHistory->paymentable, $params);
 
@@ -124,7 +125,7 @@ class PaymentManager implements Contracts\PaymentManager
         return true;
     }
 
-    public function registerDriver(string $name, string $resolver): void
+    public function registerDriver(string $name, callable $resolver): void
     {
         if (isset($this->drivers[$name])) {
             throw new InvalidArgumentException("Payment driver [$name] already registered.");
@@ -133,7 +134,7 @@ class PaymentManager implements Contracts\PaymentManager
         $this->drivers[$name] = $resolver;
     }
 
-    public function registerModule(string $name, Contracts\ModuleHandlerInterface $handler): void
+    public function registerModule(string $name, ModuleHandlerInterface $handler): void
     {
         if (isset($this->modules[$name])) {
             throw new InvalidArgumentException("Payment module [$name] already registered.");
@@ -142,19 +143,56 @@ class PaymentManager implements Contracts\PaymentManager
         $this->modules[$name] = $handler;
     }
 
+    public function drivers(): array
+    {
+        return collect(array_keys($this->drivers))
+            ->mapWithKeys(fn ($driver) => [
+                $driver => title_from_key($driver),
+            ])
+            ->all();
+    }
+
+    public function modules(): array
+    {
+        return array_keys($this->modules);
+    }
+
     public function driver(string $name, array $config): Contracts\PaymentGatewayInterface
     {
         if (!isset($this->drivers[$name])) {
-            throw new InvalidArgumentException("Payment driver [$name] not registered.");
+            throw new PaymentException("Payment driver [$name] not registered.");
         }
 
-        return app($this->drivers[$name], ['config' => $config]);
+        return $this->drivers[$name]()->makeDriver($config);
     }
 
-    public function getModule(string $module): Contracts\ModuleHandlerInterface
+    public function config(string $driver): array
+    {
+        if (!isset($this->drivers[$driver])) {
+            throw new PaymentException("Payment driver [$driver] not registered.");
+        }
+
+        return $this->drivers[$driver]()->getConfig();
+    }
+
+    public function renderConfig(string $driver, array $config = []): string
+    {
+        $fields = $this->config($driver);
+
+        if (empty($fields)) {
+            throw new PaymentException("Payment driver [$driver] has no configuration.");
+        }
+
+        return view(
+            'payment::method.components.config',
+            ['fields' => $fields, 'config' => $config]
+        )->render();
+    }
+
+    public function module(string $module): Contracts\ModuleHandlerInterface
     {
         if (!isset($this->modules[$module])) {
-            throw new InvalidArgumentException("Payment module [$module] not registered.");
+            throw new PaymentException("Payment module [$module] not registered.");
         }
 
         return $this->modules[$module];

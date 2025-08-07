@@ -5,6 +5,8 @@ namespace Juzaweb\Modules\Payment\Providers;
 use Juzaweb\Core\Facades\Menu;
 use Juzaweb\Core\Providers\ServiceProvider;
 use Juzaweb\Modules\Payment\Contracts\PaymentManager;
+use Juzaweb\Modules\Payment\Methods;
+use Juzaweb\Modules\Payment\Services\PaymentDriverAdapter;
 
 class PaymentServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,17 @@ class PaymentServiceProvider extends ServiceProvider
             function () {
                 $this->registerMenu();
             }
+        );
+
+        $this->app[PaymentManager::class]->registerDriver(
+            'PayPal',
+            fn () => new PaymentDriverAdapter(
+                Methods\PayPal::class,
+                [
+                    'clientId' => __('Client ID'),
+                    'secret' => __('Secret'),
+                ]
+            )
         );
     }
 

@@ -13,14 +13,17 @@ namespace Juzaweb\Modules\Payment\Facades;
 use Illuminate\Support\Facades\Facade;
 use Juzaweb\Core\Models\User;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
-use Juzaweb\Modules\Payment\Models\PaymentMethod;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 
 /**
  * @method static PaymentGatewayInterface driver(string $name)
- * @method static void registerDriver(string $name, callable $resolver)
+ * @method static void registerDriver(string $name, string $resolver)
  * @method static void registerModule(string $name, array $config = [])
  * @method static PurchaseResult create(User $user, string $module, string $method, array $params)
+ * @method static array drivers()
+ * @method static array config(string $driver)
+ * @method static string renderConfig(string $driver, array $config = [])
+ * @method static array modules()
  */
 class PaymentManager extends Facade
 {

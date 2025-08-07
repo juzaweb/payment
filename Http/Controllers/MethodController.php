@@ -10,10 +10,14 @@
 
 namespace Juzaweb\Modules\Payment\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Juzaweb\Core\Facades\Breadcrumb;
 use Juzaweb\Core\Http\Controllers\AdminController;
 use Juzaweb\Modules\Payment\Http\DataTables\MethodsDataTable;
+use Juzaweb\Modules\Payment\Http\Requests\PaymentMethodRequest;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
+use Juzaweb\Modules\Payment\Facades\PaymentManager;
 
 class MethodController extends AdminController
 {
@@ -36,37 +40,55 @@ class MethodController extends AdminController
 
         Breadcrumb::add(__('Create Payment Method'));
 
+        $locale = $this->getFormLanguage();
+
         return view('payment::method.form', [
             'model' => new PaymentMethod(),
             'action' => action([static::class, 'store']),
+            'locale' => $locale,
         ]);
     }
 
-    public function edit(PaymentMethod $method)
+    public function edit(Request $request, int $id)
     {
+        $method = PaymentMethod::findOrFail($id);
+
         Breadcrumb::add(__('Payment Methods'), admin_url('payment-methods'));
 
-        Breadcrumb::add(__('Edit Payment Method'));
+        Breadcrumb::add(__('Edit Payment Method :name', ['name' => $method->name]));
+
+        $locale = $this->getFormLanguage();
+        $method->setDefaultLocale($locale);
 
         return view('payment::method.form', [
             'model' => $method,
             'action' => admin_url("payment-methods/{$method->id}"),
+            'locale' => $locale,
         ]);
     }
 
-    public function store()
+    public function store(PaymentMethodRequest $request)
     {
-        $data = request()->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'required|boolean',
-        ]);
-
-        $method = PaymentMethod::updateOrCreate(
-            ['id' => request('id')],
-            $data
-        );
+        $method = PaymentMethod::create($request->safe()->all());
 
         return $this->success(__('Payment method saved successfully.'));
+    }
+
+    public function update(PaymentMethodRequest $request, int $id)
+    {
+        $method = PaymentMethod::findOrFail($id);
+
+        $method->update($request->safe()->all());
+
+        return $this->success(
+            __('Payment method updated successfully.')
+        );
+    }
+
+    public function getData(string $driver): JsonResponse
+    {
+        return response()->json([
+            'config' => PaymentManager::renderConfig($driver),
+        ]);
     }
 }

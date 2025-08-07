@@ -4,17 +4,16 @@ namespace Juzaweb\Modules\Payment\Models;
 
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
+use Juzaweb\Core\Traits\Translatable;
 
 class PaymentMethod extends Model
 {
-    use HasAPI;
+    use HasAPI, Translatable;
 
     protected $table = 'payment_methods';
 
     protected $fillable = [
         'driver',
-        'name',
-        'description',
         'config',
         'active',
     ];
@@ -22,6 +21,11 @@ class PaymentMethod extends Model
     protected $casts = [
         'config' => 'array',
         'active' => 'boolean',
+    ];
+
+    public $translatedAttributes = [
+        'name',
+        'description',
     ];
 
     public function getConfig(?string $key = null, $default = null): null|array|string
