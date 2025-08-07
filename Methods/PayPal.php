@@ -10,6 +10,7 @@
 
 namespace Juzaweb\Modules\Payment\Methods;
 
+use Illuminate\Support\Arr;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
@@ -57,7 +58,8 @@ class PayPal implements PaymentGatewayInterface
         if (isset($this->config['sandbox']) && $this->config['sandbox']) {
             $gateway->setTestMode(true);
         }
-        $gateway->initialize($this->config);
+
+        $gateway->initialize(Arr::except($this->config, ['sandbox', 'token']));
         return $gateway;
     }
 }

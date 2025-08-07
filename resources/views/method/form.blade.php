@@ -32,9 +32,9 @@
                             ]
                         )->disabled($model->exists) }}
 
-                        {{ Field::text($model, "{$locale}[name]", ['value' => $model->name]) }}
+                        {{ Field::text($model, "{$locale}[name]", ['value' => $model->name, 'label' => __('Name')]) }}
 
-                        {{ Field::textarea($model, "{$locale}[description]") }}
+                        {{ Field::textarea($model, "{$locale}[description]", ['value' => $model->description, 'label' => __('Description')]) }}
 
                         {{ Field::checkbox($model, 'active', ['value' => $model->active ?? 1]) }}
                     </div>
@@ -52,7 +52,7 @@
                     </div>
                     <div class="card-body">
                         @if($model->exists)
-                            {!! \Juzaweb\Modules\Payment\Facades\PaymentManager::renderConfig($model->driver, $model->config) !!}
+                            {!! \Juzaweb\Modules\Payment\Facades\PaymentManager::renderConfig($model->driver, $model->config ?? []) !!}
                         @endif
                     </div>
                 </div>

@@ -26,7 +26,7 @@ class PaymentMethodRequest extends FormRequest
             ],
 			"{$locale}.name" => ['required', 'string', 'max:200'],
 			"{$locale}.description" => ['nullable', 'string', 'max:500'],
-            'locale' => ['required', 'string', 'max:10'],
+            'locale' => ['required', 'string', 'max:10', 'exists:languages,code'],
 			'config' => ['required', 'array'],
 			'active' => ['required', 'boolean'],
 		];
