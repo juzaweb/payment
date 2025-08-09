@@ -17,6 +17,7 @@ class TestOrder extends Model implements Paymentable
     protected $fillable = [
         'code',
         'amount',
+        'status',
     ];
 
     public function paymentHistories(): MorphMany

@@ -37,7 +37,7 @@ class PaymentController extends ThemeController
             return $this->success(
                 [
                     'type' => 'redirect',
-                    'redirect_url' => $payment->getRedirectUrl(),
+                    'redirect' => $payment->getRedirectUrl(),
                 ]
             );
         }

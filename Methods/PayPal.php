@@ -12,6 +12,7 @@ namespace Juzaweb\Modules\Payment\Methods;
 
 use Illuminate\Support\Arr;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
+use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
@@ -29,11 +30,17 @@ class PayPal implements PaymentGatewayInterface
     {
         $response = $this->createGateway()->purchase($params)->send();
 
+        if (! in_array($response->getCode(), [200, 201])) {
+            throw new PaymentException(
+                __('Payment gateway error: :message', ['message' => $response->getMessage()])
+            );
+        }
+
         return PurchaseResult::make(
             $response->getTransactionReference(),
             $response->getRedirectUrl(),
             $response->getData()
-        )->setSuccessful($response->isSuccessful());
+        )->setSuccessful($response->isSuccessful() && !$response->isRedirect());
     }
 
     public function complete(array $params): CompleteResult
@@ -55,11 +62,10 @@ class PayPal implements PaymentGatewayInterface
     protected function createGateway(): GatewayInterface
     {
         $gateway = Omnipay::create($this->driver);
+        $gateway->initialize(Arr::except($this->config, ['sandbox', 'token']));
         if (isset($this->config['sandbox']) && $this->config['sandbox']) {
             $gateway->setTestMode(true);
         }
-
-        $gateway->initialize(Arr::except($this->config, ['sandbox', 'token']));
         return $gateway;
     }
 }

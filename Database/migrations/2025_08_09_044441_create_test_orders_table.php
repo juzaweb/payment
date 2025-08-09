@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('code', 10)->unique()->comment('Order code');
             $table->float('amount');
+            $table->string('status')->default('pending')->comment('Order status');
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ class PaymentResult
     /**
      * @var string
      */
-    protected string $transactionId;
+    protected ?string $transactionId = null;
 
     /**
      * @var array

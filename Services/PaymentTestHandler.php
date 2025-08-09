@@ -35,6 +35,12 @@ class PaymentTestHandler implements ModuleHandlerInterface
     {
         // Implement the logic to handle a successful payment
         \Log::info('Payment successful', ['params' => $params]);
+
+        $paymentable->update(
+            [
+                'status' => 'success',
+            ]
+        );
     }
 
     public function fail(Paymentable $paymentable, array $params): void
@@ -44,6 +50,12 @@ class PaymentTestHandler implements ModuleHandlerInterface
 
         // Example: Log the failure
         \Log::error('Payment failed', ['params' => $params]);
+
+        $paymentable->update(
+            [
+                'status' => 'failed',
+            ]
+        );
     }
 
     public function cancel(Paymentable $paymentable, array $params): void
@@ -53,5 +65,11 @@ class PaymentTestHandler implements ModuleHandlerInterface
 
         // Example: Log the cancellation
         \Log::info('Payment canceled', ['params' => $params]);
+
+        $paymentable->update(
+            [
+                'status' => 'canceled',
+            ]
+        );
     }
 }
