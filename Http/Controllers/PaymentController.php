@@ -10,7 +10,6 @@ use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Facades\PaymentManager;
 use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
-use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
 class PaymentController extends ThemeController
 {
@@ -38,6 +37,7 @@ class PaymentController extends ThemeController
                 [
                     'type' => 'redirect',
                     'redirect' => $payment->getRedirectUrl(),
+                    'message' => __('Redirecting to payment gateway...'),
                 ]
             );
         }
@@ -47,31 +47,45 @@ class PaymentController extends ThemeController
 
     public function return(Request $request, string $module, string $paymentHistoryId)
     {
+        $paymentModule = PaymentManager::module($module);
+
         try {
             $payment = DB::transaction(
-                function () use ($request, $paymentHistoryId) {
+                function () use ($request, $module, $paymentHistoryId) {
                     $paymentHistory = PaymentHistory::lockForUpdate()->find($paymentHistoryId);
 
                     throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 
                     throw_if($paymentHistory->status !== PaymentHistoryStatus::PROCESSING, new PaymentException(__('Transaction has been processed!')));
 
-                    return PaymentManager::complete($paymentHistory, $request->all());
+                    return PaymentManager::complete($module, $paymentHistory, $request->all());
                 }
             );
         } catch (PaymentException $e) {
-            return $this->error($e->getMessage());
+            return $this->error(
+                [
+                    'message' => $e->getMessage(),
+                    'redirect' => $paymentModule->getReturnUrl(),
+                ]
+            );
         }
 
         if ($payment->isSuccessful()) {
-            return $this->success(__('Payment successful!'));
+            return $this->success(
+                [
+                    'message' => __('Payment completed successfully!'),
+                    'redirect' => $paymentModule->getReturnUrl(),
+                ]
+            );
         }
 
-        return $this->failResponse();
+        return $this->failResponse($paymentModule->getReturnUrl());
     }
 
     public function cancel(Request $request, string $module, string $transactionId)
     {
+        $paymentModule = PaymentManager::module($module);
+
         try {
             $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
 
@@ -82,11 +96,25 @@ class PaymentController extends ThemeController
             return $this->error($e->getMessage());
         }
 
-        return $this->success(__('Payment canceled!'));
+        return $this->warning(
+            [
+                'message' => __('Payment has been cancelled!'),
+                'redirect' => $paymentModule->getReturnUrl(),
+            ]
+        );
     }
 
-    protected function failResponse()
+    protected function failResponse(?string $redirectUrl = null)
     {
+        if ($redirectUrl) {
+            return $this->error(
+                [
+                    'message' => __('Payment failed!'),
+                    'redirect' => $redirectUrl,
+                ]
+            );
+        }
+
         return $this->error(
             __('Sorry, there was an error processing your payment. Please try again later.')
         );

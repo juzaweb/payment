@@ -72,4 +72,9 @@ class PaymentTestHandler implements ModuleHandlerInterface
             ]
         );
     }
+
+    public function getReturnUrl(): string
+    {
+        return admin_url('payment-methods');
+    }
 }

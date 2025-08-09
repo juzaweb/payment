@@ -10,9 +10,9 @@
             @endcan
 
             @can('payment-methods.create')
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-                        <i class="fas fa-galactic-senate"></i> {{ __('Test Payment') }}
-                    </button>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+                    <i class="fas fa-registered"></i> {{ __('Test Payment') }}
+                </button>
             @endcan
         </div>
     </div>
@@ -61,7 +61,7 @@
 
                         {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
 
-                        <button class="btn btn-primary">Send Payment Request</button>
+                        <button type="submit" class="btn btn-primary">Send Payment Request</button>
                     </div>
                 </div>
             </form>

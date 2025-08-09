@@ -10,8 +10,6 @@
 
 namespace Juzaweb\Modules\Payment\Contracts;
 
-use Juzaweb\Modules\Payment\Services\PaymentResult;
-
 interface ModuleHandlerInterface
 {
     public function createOrder(array $params): Paymentable;
@@ -21,4 +19,6 @@ interface ModuleHandlerInterface
     public function success(Paymentable $paymentable, array $params): void;
 
     public function cancel(Paymentable $paymentable, array $params): void;
+
+    public function getReturnUrl(): string;
 }
