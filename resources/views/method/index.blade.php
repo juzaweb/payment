@@ -59,9 +59,9 @@
                                     ->toArray()
                             ) }}
 
-                        {{ Field::text(__('Amount'), 'amount', ['value' => 10, 'label' => __('Amount')]) }}
+                        {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
 
-                        <button>Send Payment Request</button>
+                        <button class="btn btn-primary">Send Payment Request</button>
                     </div>
                 </div>
             </form>

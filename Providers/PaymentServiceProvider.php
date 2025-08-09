@@ -89,7 +89,7 @@ class PaymentServiceProvider extends ServiceProvider
     protected function registerTranslations(): void
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'payment');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang', 'payment');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
     }
 
     /**
@@ -103,9 +103,7 @@ class PaymentServiceProvider extends ServiceProvider
 
         $sourcePath = __DIR__ . '/../resources/views';
 
-        $this->publishes([
-            $sourcePath => $viewPath
-        ], ['views', 'payment-module-views']);
+        $this->publishes([$sourcePath => $viewPath], ['views', 'payment-module-views']);
 
         $this->loadViewsFrom($sourcePath, 'payment');
     }

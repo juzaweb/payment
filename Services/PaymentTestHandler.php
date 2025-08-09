@@ -10,9 +10,10 @@
 
 namespace Juzaweb\Modules\Payment\Services;
 
-use Juzaweb\Modules\Ecommerce\Models\Order;
+use Illuminate\Support\Str;
 use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Contracts\Paymentable;
+use Juzaweb\Modules\Payment\Models\TestOrder;
 
 class PaymentTestHandler implements ModuleHandlerInterface
 {
@@ -22,7 +23,12 @@ class PaymentTestHandler implements ModuleHandlerInterface
         // For example, you might interact with a payment gateway here
 
         // Return a PurchaseResult instance with the result of the purchase
-        return new Order();
+        return TestOrder::create(
+            [
+                'code' => strtoupper(Str::random(10)),
+                'amount' => $params['amount'],
+            ]
+        );
     }
 
     public function success(Paymentable $paymentable, array $params): void

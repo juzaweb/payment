@@ -48,6 +48,7 @@ class PaymentManager implements Contracts\PaymentManager
         );
 
         $paymentHistory->payer()->associate($user);
+        $paymentHistory->paymentable()->associate($order);
         $paymentHistory->save();
 
         $config = $paymentMethod->getConfig();
@@ -63,7 +64,6 @@ class PaymentManager implements Contracts\PaymentManager
         );
 
         $paymentHistory->fill(['payment_id' => $purchase->getTransactionId()]);
-        $paymentHistory->paymentable()->associate($order);
         $paymentHistory->save();
 
         if ($purchase->isSuccessful()) {
