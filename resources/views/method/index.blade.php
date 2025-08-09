@@ -8,6 +8,12 @@
                     <i class="fas fa-plus"></i> {{ __('Add Payment Method') }}
                 </a>
             @endcan
+
+            @can('payment-methods.create')
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+                        <i class="fas fa-galactic-senate"></i> {{ __('Test Payment') }}
+                    </button>
+            @endcan
         </div>
     </div>
 
@@ -34,5 +40,33 @@
 @endsection
 
 @section('scripts')
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form method="post" action="{{ route('payment.purchase', ['test']) }}" class="form-ajax">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{ __('Test Payment') }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {{ Field::select(__('Method'), 'method')->dropDownList(
+                                \Juzaweb\Modules\Payment\Models\PaymentMethod::withTranslation()
+                                    ->where('active', true)
+                                    ->get()
+                                    ->pluck('name', 'driver')
+                                    ->toArray()
+                            ) }}
+
+                        {{ Field::text(__('Amount'), 'amount', ['value' => 10, 'label' => __('Amount')]) }}
+
+                        <button>Send Payment Request</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{ $dataTable->scripts() }}
 @endsection

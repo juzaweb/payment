@@ -7,6 +7,7 @@ use Juzaweb\Core\Providers\ServiceProvider;
 use Juzaweb\Modules\Payment\Contracts\PaymentManager;
 use Juzaweb\Modules\Payment\Methods;
 use Juzaweb\Modules\Payment\Services\PaymentDriverAdapter;
+use Juzaweb\Modules\Payment\Services\PaymentTestHandler;
 
 class PaymentServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,11 @@ class PaymentServiceProvider extends ServiceProvider
             function () {
                 $this->registerMenu();
             }
+        );
+
+        $this->app[PaymentManager::class]->registerModule(
+            'test',
+            new PaymentTestHandler()
         );
 
         $this->app[PaymentManager::class]->registerDriver(
