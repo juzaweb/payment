@@ -10,6 +10,7 @@
 
 namespace Juzaweb\Modules\Payment\Contracts;
 
+use Illuminate\Http\Request;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 
@@ -19,5 +20,5 @@ interface PaymentGatewayInterface
 
     public function complete(array $params): CompleteResult;
 
-    public function handleWebhook(array $data): void;
+    public function handleWebhook(Request $request): CompleteResult;
 }

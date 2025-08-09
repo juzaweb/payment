@@ -10,6 +10,7 @@
 
 namespace Juzaweb\Modules\Payment\Methods;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
@@ -54,7 +55,7 @@ class PayPal implements PaymentGatewayInterface
         );
     }
 
-    public function handleWebhook(array $data): void
+    public function handleWebhook(Request $request): CompleteResult
     {
         // TODO: Implement handleWebhook() method.
     }
