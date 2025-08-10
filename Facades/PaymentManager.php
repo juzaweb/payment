@@ -18,7 +18,7 @@ use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 
 /**
- * @method static PaymentGatewayInterface driver(string $name)
+ * @method static PaymentGatewayInterface driver(string $name, array $config = [])
  * @method static void registerDriver(string $name, string $resolver)
  * @method static void registerModule(string $name, array $config = [])
  * @method static PurchaseResult create(User $user, string $module, string $method, array $params)

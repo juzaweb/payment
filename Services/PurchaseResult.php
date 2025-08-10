@@ -36,23 +36,6 @@ class PurchaseResult extends PaymentResult
         return $this->redirectUrl !== null;
     }
 
-    public function isEmbed(): bool
-    {
-        return $this->embedUrl !== null;
-    }
-
-    public function setEmbedUrl(string $url): self
-    {
-        $this->embedUrl = $url;
-
-        return $this;
-    }
-
-    public function getEmbedUrl(): ?string
-    {
-        return $this->embedUrl;
-    }
-
     public function setRedirectUrl(string $url): self
     {
         $this->redirectUrl = $url;

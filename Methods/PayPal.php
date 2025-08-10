@@ -19,7 +19,7 @@ use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Omnipay;
 
-class PayPal implements PaymentGatewayInterface
+class PayPal extends PaymentGateway implements PaymentGatewayInterface
 {
     protected string $driver = 'PayPal_Rest';
 

@@ -12,6 +12,8 @@ namespace Juzaweb\Modules\Payment\Services;
 
 class CompleteResult extends PaymentResult
 {
+    protected bool $isEmbed = false;
+
     public static function make(string $transactionId, string $isSuccessful, array $data = []): static
     {
         return new self($transactionId, $isSuccessful, $data);

@@ -21,4 +21,6 @@ interface PaymentGatewayInterface
     public function complete(array $params): CompleteResult;
 
     public function handleWebhook(Request $request): ?CompleteResult;
+
+    public function isReturnInEmbed(): bool;
 }

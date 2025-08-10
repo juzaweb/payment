@@ -10,13 +10,16 @@ use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Facades\PaymentManager;
 use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
+use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
 class PaymentController extends ThemeController
 {
     public function purchase(PaymentRequest $request, string $module)
     {
         $user = $request->user();
-        $method = $request->post('method');
+        $method = PaymentMethod::where('driver', $request->get('method'))
+            ->where('active', true)
+            ->first();
 
         try {
             $payment = DB::transaction(
@@ -33,20 +36,20 @@ class PaymentController extends ThemeController
         }
 
         if ($payment->isRedirect()) {
+            if ($method->paymentDriver()->isReturnInEmbed()) {
+                return $this->success(
+                    [
+                        'type' => 'embed',
+                        'embedUrl' => $payment->getRedirectUrl(),
+                    ]
+                );
+            }
+
             return $this->success(
                 [
                     'type' => 'redirect',
                     'redirect' => $payment->getRedirectUrl(),
                     'message' => __('Redirecting to payment gateway...'),
-                ]
-            );
-        }
-
-        if ($payment->isEmbed()) {
-            return $this->success(
-                [
-                    'type' => 'embed',
-                    'embedUrl' => $payment->getEmbedUrl(),
                 ]
             );
         }
@@ -57,15 +60,22 @@ class PaymentController extends ThemeController
     public function return(Request $request, string $module, string $paymentHistoryId)
     {
         $paymentModule = PaymentManager::module($module);
+        $returnUrl = $paymentModule->getReturnUrl();
 
         try {
             $payment = DB::transaction(
-                function () use ($request, $module, $paymentHistoryId) {
+                function () use ($request, $module, $paymentHistoryId, &$returnUrl) {
                     $paymentHistory = PaymentHistory::lockForUpdate()->find($paymentHistoryId);
 
                     throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 
                     throw_if($paymentHistory->status !== PaymentHistoryStatus::PROCESSING, new PaymentException(__('Transaction has been processed!')));
+
+                    $gateway = $paymentHistory->paymentMethod->paymentDriver();
+
+                    if ($gateway->isReturnInEmbed()) {
+                        $returnUrl = route('payment.embed', [$module, $paymentHistoryId]);
+                    }
 
                     return PaymentManager::complete($module, $paymentHistory, $request->all());
                 }
@@ -74,7 +84,7 @@ class PaymentController extends ThemeController
             return $this->error(
                 [
                     'message' => $e->getMessage(),
-                    'redirect' => $paymentModule->getReturnUrl(),
+                    'redirect' => $returnUrl,
                 ]
             );
         }
@@ -83,33 +93,51 @@ class PaymentController extends ThemeController
             return $this->success(
                 [
                     'message' => __('Payment completed successfully!'),
-                    'redirect' => $paymentModule->getReturnUrl(),
+                    'redirect' => $returnUrl,
                 ]
             );
         }
 
-        return $this->failResponse($paymentModule->getReturnUrl());
+        return $this->failResponse($returnUrl);
     }
 
     public function cancel(Request $request, string $module, string $transactionId)
     {
         $paymentModule = PaymentManager::module($module);
+        $returnUrl = $paymentModule->getReturnUrl();
 
         try {
-            $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
+            $payment = DB::transaction(
+                function () use ($transactionId, $module, $request) {
+                    $paymentHistory = PaymentHistory::lockForUpdate()->find($transactionId);
 
-            abort_if($paymentHistory == null, 404, __('Transaction not found!'));
+                    throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 
-            $payment = DB::transaction(fn () => PaymentManager::cancel($module, $paymentHistory, $request->all()));
+                    return PaymentManager::cancel($module, $paymentHistory, $request->all());
+                }
+            );
         } catch (PaymentException $e) {
-            return $this->error($e->getMessage());
+            return $this->error([
+                'message' => $e->getMessage(),
+                'redirect' => $returnUrl,
+            ]);
         }
 
         return $this->warning(
             [
                 'message' => __('Payment has been cancelled!'),
-                'redirect' => $paymentModule->getReturnUrl(),
+                'redirect' => $returnUrl,
             ]
+        );
+    }
+
+    public function embed(string $module, string $transactionId)
+    {
+        $paymentHistory = PaymentHistory::find($transactionId);
+
+        return view(
+            'payment::method.embed',
+            compact('module', 'paymentHistory')
         );
     }
 

@@ -28,20 +28,22 @@ class PaymentManager implements Contracts\PaymentManager
 
     protected array $modules = [];
 
-    public function create(User $user, string $module, string $method, array $params): PurchaseResult
+    public function create(User $user, string $module, string|PaymentMethod $paymentMethod, array $params): PurchaseResult
     {
         $handler = $this->module($module);
         $order = $handler->createOrder($params);
 
-        $paymentMethod = PaymentMethod::where('driver', $method)
-            ->where('active', true)
-            ->first();
+        if (!$paymentMethod instanceof PaymentMethod) {
+            $paymentMethod = PaymentMethod::where('driver', $paymentMethod)
+                ->where('active', true)
+                ->first();
+        }
 
         throw_if($paymentMethod == null, PaymentException::make(__('Payment method not found!')));
 
         $paymentHistory = new PaymentHistory(
             [
-                'payment_method' => $method,
+                'payment_method' => $paymentMethod->driver,
                 'module' => $module,
                 'status' => PaymentHistoryStatus::PROCESSING,
             ]

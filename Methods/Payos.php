@@ -13,14 +13,15 @@ namespace Juzaweb\Modules\Payment\Methods;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
-use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Omnipay;
 
-class Payos implements PaymentGatewayInterface
+class Payos extends PaymentGateway implements PaymentGatewayInterface
 {
+    protected bool $returnInEmbed = true;
+
     public function __construct(protected array $config)
     {
     }
@@ -30,15 +31,16 @@ class Payos implements PaymentGatewayInterface
         $response = $this->createGateway()->purchase(
             [
                 'amount' => $params['amount'] * 26000,
-                'orderCode' => $params['code'] + random_int(1000, 9999),
+                'orderCode' => $params['code'],
                 ...Arr::except($params, ['amount', 'paymentHistoryId', 'quantity']),
             ]
         )->send();
 
         return PurchaseResult::make(
             $response->getTransactionReference(),
-            data: $response->getData()
-        )->setEmbedUrl($response->getEmbedUrl());
+            $response->getRedirectUrl() . '/?embedded=true',
+            $response->getData()
+        );
     }
 
     public function complete(array $params): CompleteResult
