@@ -55,9 +55,11 @@ class PaymentManager implements Contracts\PaymentManager
 
         $purchase = $this->driver($paymentMethod->driver, $config)->purchase(
             [
+                'code' => $order->getCode(),
                 'amount' => $order->getTotalAmount(),
                 'currency' => $order->getCurrency(),
                 'description' => $order->getPaymentDescription(),
+                'paymentHistoryId' => $paymentHistory->id,
                 'returnUrl' => route('payment.return', [$module, $paymentHistory->id]),
                 'cancelUrl' => route('payment.cancel', [$module, $paymentHistory->id]),
             ]

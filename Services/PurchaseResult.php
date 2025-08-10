@@ -17,6 +17,8 @@ class PurchaseResult extends PaymentResult
      */
     protected ?string $redirectUrl = null;
 
+    protected ?string $embedUrl = null;
+
     public static function make(?string $transactionId = null, string $redirectUrl = null, array $data = []): static
     {
         return new self($transactionId, $redirectUrl, $data);
@@ -32,6 +34,23 @@ class PurchaseResult extends PaymentResult
     public function isRedirect(): bool
     {
         return $this->redirectUrl !== null;
+    }
+
+    public function isEmbed(): bool
+    {
+        return $this->embedUrl !== null;
+    }
+
+    public function setEmbedUrl(string $url): self
+    {
+        $this->embedUrl = $url;
+
+        return $this;
+    }
+
+    public function getEmbedUrl(): ?string
+    {
+        return $this->embedUrl;
     }
 
     public function setRedirectUrl(string $url): self

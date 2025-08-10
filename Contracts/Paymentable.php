@@ -17,4 +17,6 @@ interface Paymentable
     public function getCurrency(): string;
 
     public function getPaymentDescription(): string;
+
+    public function getCode(): string;
 }

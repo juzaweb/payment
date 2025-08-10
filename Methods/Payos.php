@@ -27,19 +27,20 @@ class Payos implements PaymentGatewayInterface
 
     public function purchase(array $params): PurchaseResult
     {
-        $response = $this->createGateway()->purchase($params)->send();
-
-        if (! in_array($response->getCode(), [200, 201])) {
-            throw new PaymentException(
-                __('Payment gateway error: :message', ['message' => $response->getMessage()])
-            );
-        }
+        $response = $this->createGateway()->purchase(
+            [
+                'amount' => $params['amount'] * 26000,
+                'orderCode' => $params['code'] + random_int(1000, 9999),
+                ...Arr::except($params, ['amount', 'paymentHistoryId', 'quantity']),
+            ]
+        )->send();
 
         return PurchaseResult::make(
             $response->getTransactionReference(),
             $response->getRedirectUrl(),
             $response->getData()
-        )->setSuccessful($response->isSuccessful() && !$response->isRedirect());
+        )
+            ->setEmbedUrl($response->getEmbedUrl());
     }
 
     public function complete(array $params): CompleteResult

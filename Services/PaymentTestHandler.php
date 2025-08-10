@@ -25,7 +25,6 @@ class PaymentTestHandler implements ModuleHandlerInterface
         // Return a PurchaseResult instance with the result of the purchase
         return TestOrder::create(
             [
-                'code' => strtoupper(Str::random(10)),
                 'amount' => $params['amount'],
             ]
         );

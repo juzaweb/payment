@@ -5,12 +5,13 @@ namespace Juzaweb\Modules\Payment\Models;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
+use Juzaweb\Core\Traits\HasCodeWithMonth;
 use Juzaweb\Modules\Payment\Contracts\Paymentable;
 use Juzaweb\Modules\Payment\Traits\HasPayment;
 
 class TestOrder extends Model implements Paymentable
 {
-    use HasAPI, HasPayment;
+    use HasAPI, HasPayment, HasCodeWithMonth;
 
     protected $table = 'test_orders';
 
@@ -37,6 +38,11 @@ class TestOrder extends Model implements Paymentable
 
     public function getPaymentDescription(): string
     {
-        return __('Order payment for order #:code', ['code' => $this->code]);
+        return __('Payment order #:code', ['code' => $this->code]);
+    }
+
+    public function getCode(): string
+    {
+        return $this->code;
     }
 }
