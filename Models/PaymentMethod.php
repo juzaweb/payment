@@ -25,10 +25,19 @@ class PaymentMethod extends Model
         'active' => 'boolean',
     ];
 
+    protected $appends = [
+        'sandbox',
+    ];
+
     public $translatedAttributes = [
         'name',
         'description',
     ];
+
+    public function getSandboxAttribute(): bool
+    {
+        return (bool) $this->getConfig('sandbox', false);
+    }
 
     public function paymentDriver(): PaymentGatewayInterface
     {

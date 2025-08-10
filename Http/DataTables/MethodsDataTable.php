@@ -17,6 +17,7 @@ use Juzaweb\Core\DataTables\BulkAction;
 use Juzaweb\Core\DataTables\Column;
 use Juzaweb\Core\DataTables\DataTable;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
+use Yajra\DataTables\EloquentDataTable;
 
 class MethodsDataTable extends DataTable
 {
@@ -33,9 +34,18 @@ class MethodsDataTable extends DataTable
             Column::checkbox(),
             Column::id(),
             Column::editLink('name', admin_url('payment-methods/{id}/edit'), __('Name')),
+            Column::make('sandbox', __('Sandbox'))->center()->width('100px'),
             Column::createdAt(),
             Column::actions(),
         ];
+    }
+
+    public function renderColumns(EloquentDataTable $builder): EloquentDataTable
+    {
+        return $builder->editColumn(
+            'sandbox',
+            fn (PaymentMethod $model) => $model->sandbox ? __('Yes') : __('No')
+        );
     }
 
     public function bulkActions(): array
