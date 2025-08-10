@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Juzaweb\Core\Http\Controllers\ThemeController;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
+use Juzaweb\Modules\Payment\Events\PaymentFail;
+use Juzaweb\Modules\Payment\Events\PaymentSuccess;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Facades\PaymentManager;
 use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
@@ -129,6 +131,72 @@ class PaymentController extends ThemeController
                 'redirect' => $returnUrl,
             ]
         );
+    }
+
+    public function webhook(Request $request, string $module, string $driver)
+    {
+        $handler = PaymentManager::module($module);
+        $paymentMethod = PaymentMethod::where('driver', $driver)
+            ->where('active', true)
+            ->first();
+
+        throw_if($paymentMethod == null, new PaymentException(__('Payment method not found!')));
+
+        $gateway = $paymentMethod->paymentDriver();
+
+        $response = $gateway->handleWebhook($request);
+
+        if ($response === null) {
+            return response(['success' => true]);
+        }
+
+        try {
+            $payment = DB::transaction(
+                function () use ($request, $handler, $module, $response) {
+                    $paymentHistory = PaymentHistory::lockForUpdate()
+                        ->where(['payment_id' => $response->getTransactionId(), 'module' => $module])
+                        ->first();
+
+                    throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
+
+                    throw_if($paymentHistory->status !== PaymentHistoryStatus::PROCESSING, new PaymentException(__('Transaction has been processed!')));
+
+                    if ($response->isSuccessful()) {
+                        $handler->success($paymentHistory->paymentable, $request->all());
+
+                        $paymentHistory->update(
+                            [
+                                'status' => PaymentHistoryStatus::SUCCESS,
+                            ]
+                        );
+
+                        event(new PaymentSuccess($paymentHistory->paymentable, $request->all()));
+                    } else {
+                        $handler->fail($paymentHistory->paymentable, $request->all());
+
+                        $paymentHistory->update(
+                            [
+                                'status' => PaymentHistoryStatus::FAILED,
+                            ]
+                        );
+
+                        event(new PaymentFail($paymentHistory->paymentable, $request->all()));
+                    }
+
+                    return $paymentHistory;
+                }
+            );
+        } catch (PaymentException $e) {
+            report($e);
+            return response(
+                [
+                    'message' => $e->getMessage(),
+                    'success' => false,
+                ]
+            );
+        }
+
+        return response(['success' => true]);
     }
 
     public function embed(string $module, string $transactionId)
