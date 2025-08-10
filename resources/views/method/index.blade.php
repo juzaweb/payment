@@ -40,9 +40,11 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('payment.js') }}"></script>
+
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
-            <form method="post" action="{{ route('payment.purchase', ['test']) }}" class="form-ajax">
+            <form method="post" action="{{ route('payment.purchase', ['test']) }}" class="form-ajax" data-success="handlePaymentSuccess">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">{{ __('Test Payment') }}</h5>
@@ -51,7 +53,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        {{ Field::select(__('Method'), 'method')->dropDownList(
+                        <div id="payment-container">
+                            {{ Field::select(__('Method'), 'method')->dropDownList(
                                 \Juzaweb\Modules\Payment\Models\PaymentMethod::withTranslation()
                                     ->where('active', true)
                                     ->get()
@@ -59,9 +62,10 @@
                                     ->toArray()
                             ) }}
 
-                        {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
+                            {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
 
-                        <button type="submit" class="btn btn-primary">Send Payment Request</button>
+                            <button type="submit" class="btn btn-primary">Send Payment Request</button>
+                        </div>
                     </div>
                 </div>
             </form>

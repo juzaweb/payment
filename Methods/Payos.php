@@ -37,10 +37,8 @@ class Payos implements PaymentGatewayInterface
 
         return PurchaseResult::make(
             $response->getTransactionReference(),
-            $response->getRedirectUrl(),
-            $response->getData()
-        )
-            ->setEmbedUrl($response->getEmbedUrl());
+            data: $response->getData()
+        )->setEmbedUrl($response->getEmbedUrl());
     }
 
     public function complete(array $params): CompleteResult

@@ -42,6 +42,15 @@ class PaymentController extends ThemeController
             );
         }
 
+        if ($payment->isEmbed()) {
+            return $this->success(
+                [
+                    'type' => 'embed',
+                    'embedUrl' => $payment->getEmbedUrl(),
+                ]
+            );
+        }
+
         return $this->failResponse();
     }
 
