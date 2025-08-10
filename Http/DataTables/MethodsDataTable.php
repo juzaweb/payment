@@ -35,6 +35,9 @@ class MethodsDataTable extends DataTable
             Column::id(),
             Column::editLink('name', admin_url('payment-methods/{id}/edit'), __('Name')),
             Column::make('sandbox', __('Sandbox'))->center()->width('100px'),
+            Column::make('active', __('Active'))
+                ->center()
+                ->width('100px'),
             Column::createdAt(),
             Column::actions(),
         ];
@@ -42,10 +45,14 @@ class MethodsDataTable extends DataTable
 
     public function renderColumns(EloquentDataTable $builder): EloquentDataTable
     {
-        return $builder->editColumn(
-            'sandbox',
-            fn (PaymentMethod $model) => $model->sandbox ? __('Yes') : __('No')
-        );
+        return $builder
+            ->editColumn(
+                'active',
+                fn (PaymentMethod $model) => $model->active ? __('Yes') : __('No'))
+            ->editColumn(
+                'sandbox',
+                fn (PaymentMethod $model) => $model->sandbox ? __('Yes') : __('No')
+            );
     }
 
     public function bulkActions(): array
