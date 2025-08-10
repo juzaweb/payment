@@ -55,9 +55,10 @@ class PayPal implements PaymentGatewayInterface
         );
     }
 
-    public function handleWebhook(Request $request): CompleteResult
+    public function handleWebhook(Request $request): ?CompleteResult
     {
         // TODO: Implement handleWebhook() method.
+        return null;
     }
 
     protected function createGateway(): GatewayInterface

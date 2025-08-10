@@ -163,11 +163,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     public function driver(string $name, array $config): Contracts\PaymentGatewayInterface
     {
-        if (!isset($this->drivers[$name])) {
-            throw new PaymentException("Payment driver [$name] not registered.");
-        }
-
-        return $this->drivers[$name]()->makeDriver($config);
+        return $this->driverAdapter($name)->makeDriver($config);
     }
 
     public function config(string $driver): array
@@ -179,9 +175,19 @@ class PaymentManager implements Contracts\PaymentManager
         return $this->drivers[$driver]()->getConfig();
     }
 
+    public function driverAdapter(string $name): PaymentDriverAdapter
+    {
+        if (!isset($this->drivers[$name])) {
+            throw new PaymentException("Payment driver [$name] not registered.");
+        }
+
+        return $this->drivers[$name]();
+    }
+
     public function renderConfig(string $driver, array $config = []): string
     {
         $fields = $this->config($driver);
+        $hasSandbox = $this->driverAdapter($driver)->hasSandbox();
 
         if (empty($fields)) {
             throw new PaymentException("Payment driver [$driver] has no configuration.");
@@ -189,7 +195,7 @@ class PaymentManager implements Contracts\PaymentManager
 
         return view(
             'payment::method.components.config',
-            ['fields' => $fields, 'config' => $config]
+            ['fields' => $fields, 'config' => $config, 'hasSandbox' => $hasSandbox]
         )->render();
     }
 

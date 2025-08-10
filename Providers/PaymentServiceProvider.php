@@ -39,6 +39,19 @@ class PaymentServiceProvider extends ServiceProvider
                 ]
             )
         );
+
+        $this->app[PaymentManager::class]->registerDriver(
+            'Payos',
+            fn () => new PaymentDriverAdapter(
+                Methods\Payos::class,
+                [
+                    'clientId' => __('Client ID'),
+                    'key' => __('Key'),
+                    'checksumKey' => __('Checksum Key'),
+                ],
+                false
+            )
+        );
     }
 
     /**

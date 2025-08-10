@@ -32,7 +32,7 @@
                             ]
                         )->disabled($model->exists) }}
 
-                        {{ Field::text($model, "{$locale}[name]", ['value' => $model->name, 'label' => __('Name')]) }}
+                        {{ Field::text($model, "{$locale}[name]", ['id' => 'name', 'value' => $model->name, 'label' => __('Name')]) }}
 
                         {{ Field::textarea($model, "{$locale}[description]", ['value' => $model->description, 'label' => __('Description')]) }}
 
