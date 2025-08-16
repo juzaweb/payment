@@ -21,6 +21,8 @@ use Stripe\Webhook;
 
 class Stripe extends PaymentGateway implements PaymentGatewayInterface
 {
+    protected bool $returnInEmbed = true;
+
     public function __construct(protected array $config)
     {
     }
@@ -33,6 +35,25 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
             throw new PaymentException($response->getData()['error']['message']);
         }
 
+        $data = $response->getData();
+
+        $paymentIntentId = $data['id'] ?? null; // thường kiểu pi_xxx
+
+        if ($paymentIntentId && $data['status'] === 'requires_confirmation') {
+            $confirmResponse = $this->createGateway()->confirm(
+                [
+                    'paymentIntentReference' => $paymentIntentId,
+                    'returnUrl' => $params['returnUrl'],
+                ]
+            )->send();
+
+            return PurchaseResult::make(
+                $paymentIntentId,
+                $confirmResponse->getRedirectUrl(),
+                $confirmResponse->getData()
+            )->setSuccessful($confirmResponse->isSuccessful() && !$confirmResponse->isRedirect());
+        }
+
         return PurchaseResult::make(
             $response->getTransactionReference(),
             $response->getRedirectUrl(),
@@ -42,10 +63,19 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
 
     public function complete(array $params): CompleteResult
     {
+        $params['paymentIntentReference'] = $params['payment_intent'];
         $response = $this->createGateway()->completePurchase($params)->send();
 
+        if (isset($response->getData()['error']) && $response->getData()['error']) {
+            throw new PaymentException($response->getData()['error']['message']);
+        }
+
+        $data = $response->getData();
+
+        $paymentIntentId = $data['id'];
+
         return CompleteResult::make(
-            $response->getTransactionReference(),
+            $paymentIntentId,
             $response->isSuccessful(),
             $response->getData()
         );
@@ -59,7 +89,7 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
 
     protected function createGateway(): GatewayInterface
     {
-        $gateway = Omnipay::create('Stripe');
+        $gateway = Omnipay::create('Stripe\PaymentIntents');
         $gateway->setApiKey($this->config['secret_key']);
         if (isset($this->config['sandbox']) && $this->config['sandbox']) {
             $gateway->setTestMode(true);

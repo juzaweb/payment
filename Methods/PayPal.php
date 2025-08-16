@@ -46,6 +46,7 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
 
     public function complete(array $params): CompleteResult
     {
+        unset($params['token']);
         $response = $this->createGateway()->completePurchase($params)->send();
 
         return CompleteResult::make(

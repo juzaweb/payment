@@ -92,8 +92,7 @@ class PaymentManager implements Contracts\PaymentManager
         $handler = $this->module($module);
 
         $params['transactionReference'] = $paymentHistory->payment_id;
-
-        unset($params['token']);
+        $params['returnUrl'] = route('payment.return', [$module, $paymentHistory->id]);
 
         $response = $gateway->complete($params);
 

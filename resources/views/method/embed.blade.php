@@ -22,17 +22,15 @@
 
 <body>
 
-    @if($paymentHistory->status === \Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus::SUCCESS)
-    <div class="alert alert-success">
-        <strong>{{ __('Successful') }}</strong>
-        <p>{{ __('Payment successful :amount', ['amount' => $paymentHistory->paymentable?->getTotalAmount()]) }}</p>
+@if(session()->has('message'))
+    <div class="alert alert-{{ session()->get('status') != 'error' ?: 'danger' }} jw-message">
+        {{ session()->get('message') }}
+
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
-    @else
-    <div class="alert alert-danger">
-        <strong>{{ __('Failed') }}</strong>
-        <p>{{ __('Payment failed :amount', ['amount' => $paymentHistory->paymentable?->getTotalAmount()]) }}</p>
-    </div>
-    @endif
+@endif
 
 </body>
 </html>
