@@ -29,6 +29,9 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware(['theme'])
                 ->prefix(Locale::setLocale())
                 ->group(__DIR__ . '/../routes/web.php');
+
+            Route::middleware([])
+                ->group(__DIR__ . '/../routes/webhook.php');
         });
     }
 }

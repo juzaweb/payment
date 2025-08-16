@@ -35,11 +35,11 @@ class PaymentTestHandler implements ModuleHandlerInterface
         // Implement the logic to handle a successful payment
         \Log::info('Payment successful', ['params' => $params]);
 
-        $paymentable->update(
-            [
-                'status' => 'success',
-            ]
-        );
+        // $paymentable->update(
+        //     [
+        //         'status' => 'success',
+        //     ]
+        // );
     }
 
     public function fail(Paymentable $paymentable, array $params): void

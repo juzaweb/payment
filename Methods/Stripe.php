@@ -11,6 +11,7 @@
 namespace Juzaweb\Modules\Payment\Methods;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
@@ -37,7 +38,7 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
 
         $data = $response->getData();
 
-        $paymentIntentId = $data['id'] ?? null; // thường kiểu pi_xxx
+        $paymentIntentId = $data['id'] ?? null;
 
         if ($paymentIntentId && $data['status'] === 'requires_confirmation') {
             $confirmResponse = $this->createGateway()->confirm(
@@ -83,7 +84,39 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
 
     public function handleWebhook(Request $request): ?CompleteResult
     {
-        // TODO: Implement handleWebhook() method.
+        $payload = @file_get_contents('php://input');
+        $sigHeader = $request->headers->get('stripe-signature');
+
+        try {
+            $event = Webhook::constructEvent(
+                $payload, $sigHeader, 'whsec_TbTC0wsspTjhQWxPQLywVLTj2YugpCci'
+            );
+
+            if ($event->type === 'payment_intent.succeeded') {
+                $paymentIntent = $event->data->object;
+
+                $transactionId = $paymentIntent->id;
+
+                return CompleteResult::make(
+                    $transactionId,
+                    true
+                );
+            }
+
+            if ($event->type === 'payment_intent.payment_failed') {
+                $paymentIntent = $event->data->object;
+
+                $transactionId = $paymentIntent->id;
+
+                return CompleteResult::make(
+                    $transactionId,
+                    false
+                );
+            }
+        } catch (\Exception $e) {
+            report($e);
+        }
+
         return null;
     }
 

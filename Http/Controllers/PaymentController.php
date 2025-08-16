@@ -4,6 +4,7 @@ namespace Juzaweb\Modules\Payment\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Juzaweb\Core\Http\Controllers\ThemeController;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 use Juzaweb\Modules\Payment\Events\PaymentFail;
@@ -140,7 +141,23 @@ class PaymentController extends ThemeController
             ->where('active', true)
             ->first();
 
-        throw_if($paymentMethod == null, new PaymentException(__('Payment method not found!')));
+        if ($paymentMethod == null) {
+            Log::error(
+                'Payment method not found',
+                [
+                    'module' => $module,
+                    'driver' => $driver,
+                    'request' => $request->all(),
+                ]
+            );
+
+            return response(
+                [
+                    'message' => __('Payment method not found!'),
+                    'success' => false,
+                ]
+            );
+        }
 
         $gateway = $paymentMethod->paymentDriver();
 
