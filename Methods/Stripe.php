@@ -17,6 +17,7 @@ use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Omnipay;
+use Stripe\Webhook;
 
 class Stripe extends PaymentGateway implements PaymentGatewayInterface
 {
@@ -59,7 +60,7 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
     protected function createGateway(): GatewayInterface
     {
         $gateway = Omnipay::create('Stripe');
-        $gateway->setApiKey($this->config['apiKey']);
+        $gateway->setApiKey($this->config['secret_key']);
         if (isset($this->config['sandbox']) && $this->config['sandbox']) {
             $gateway->setTestMode(true);
         }

@@ -46,7 +46,17 @@
     <script>
         $(function () {
             const paymentForm = new PaymentForm(
-                '#payment-form'
+                '#payment-form',
+                {
+                    stripePublishKey: '{{ $paymentMethods->where('driver', 'Stripe')->first()->config['publishable_key'] ?? '' }}',
+                    language: {
+                        'cardholder_name': '{{ __('Cardholder Name') }}',
+                        'card_number': '{{ __('Card Number') }}',
+                        'expiry_date': '{{ __('Expiry Date') }}',
+                        'cvc': '{{ __('CVC') }}',
+                        'stripe_publish_key_not_set': '{{ __('Stripe publish key is not set.') }}',
+                    }
+                }
             );
         });
     </script>
@@ -68,11 +78,7 @@
                     <div class="modal-body">
                         <div id="payment-container">
                             {{ Field::select(__('Method'), 'method')->dropDownList(
-                                \Juzaweb\Modules\Payment\Models\PaymentMethod::withTranslation()
-                                    ->where('active', true)
-                                    ->get()
-                                    ->pluck('name', 'driver')
-                                    ->toArray()
+                                $paymentMethods->pluck('name', 'driver')->toArray()
                             ) }}
 
                             {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
@@ -81,7 +87,7 @@
 
                             <div id="payment-message"></div>
 
-                            <button type="submit" class="btn btn-primary">Send Payment Request</button>
+                            <button type="submit" class="btn btn-primary">{{ __('Send Payment Request') }}</button>
                         </div>
                     </div>
                 </div>

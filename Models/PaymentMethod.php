@@ -34,6 +34,10 @@ class PaymentMethod extends Model
         'description',
     ];
 
+    protected $hidden = [
+        'config',
+    ];
+
     public function getSandboxAttribute(): bool
     {
         return (bool) $this->getConfig('sandbox', false);

@@ -25,11 +25,16 @@ class MethodController extends AdminController
     {
         Breadcrumb::add(__('Payment Methods'));
 
+        $paymentMethods = PaymentMethod::withTranslation()
+            ->where('active', true)
+            ->get();
+
         return $dataTable->render(
             'payment::method.index',
             [
                 'title' => __('payment::translation.payment_methods'),
                 'description' => __('payment::translation.payment_methods_description'),
+                'paymentMethods' => $paymentMethods,
             ]
         );
     }
