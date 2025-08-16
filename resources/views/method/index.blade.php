@@ -45,26 +45,9 @@
 
     <script>
         $(function () {
-            const stripe = Stripe("pk_test_51RuZNjA3YeRZ6FZ0JEqSjDvTRI54sz4DEeYkapkBMuFx8XuJJAE35HKr6X85eoxanMAJXcgafwWG7nU5rOJn4iEN00JCQpJLF4");
-            const elements = stripe.elements();
-            const card = elements.create("card");
-            card.mount("#card-element");
-
-            const form = document.getElementById("payment-form");
-            form.addEventListener("submit", async function(e) {
-                const {token, error} = await stripe.createToken(card);
-
-                if (error) {
-                    alert(error.message);
-                } else {
-                    // Thêm token vào form trước khi submit
-                    const hiddenInput = document.createElement("input");
-                    hiddenInput.setAttribute("type", "hidden");
-                    hiddenInput.setAttribute("name", "token");
-                    hiddenInput.setAttribute("value", token.id);
-                    form.appendChild(hiddenInput);
-                }
-            });
+            const paymentForm = new PaymentForm(
+                '#payment-form'
+            );
         });
     </script>
 
@@ -72,7 +55,6 @@
         <div class="modal-dialog" role="document">
             <form method="post"
                   action="{{ route('payment.purchase', ['test']) }}"
-                  class="form-ajax"
                   data-success="handlePaymentSuccess"
                   id="payment-form"
             >
@@ -95,7 +77,9 @@
 
                             {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
 
-                            <div id="card-element"><!-- Stripe.js sẽ mount thẻ card input vào đây --></div>
+                            <div id="form-card"></div>
+
+                            <div id="payment-message"></div>
 
                             <button type="submit" class="btn btn-primary">Send Payment Request</button>
                         </div>

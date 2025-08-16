@@ -12,6 +12,7 @@ namespace Juzaweb\Modules\Payment\Methods;
 
 use Illuminate\Http\Request;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
+use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
@@ -26,6 +27,10 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
     public function purchase(array $params): PurchaseResult
     {
         $response = $this->createGateway()->purchase($params)->send();
+
+        if (isset($response->getData()['error']) && $response->getData()['error']) {
+            throw new PaymentException($response->getData()['error']['message']);
+        }
 
         return PurchaseResult::make(
             $response->getTransactionReference(),

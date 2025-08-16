@@ -42,7 +42,7 @@ class PaymentController extends ThemeController
                 return $this->success(
                     [
                         'type' => 'embed',
-                        'embedUrl' => $payment->getRedirectUrl(),
+                        'embed_url' => $payment->getRedirectUrl(),
                     ]
                 );
             }

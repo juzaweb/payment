@@ -58,7 +58,8 @@ class PaymentServiceProvider extends ServiceProvider
             fn () => new PaymentDriverAdapter(
                 Methods\Stripe::class,
                 [
-                    'apiKey' => __('API Key'),
+                    'publishable_key' => __('Publishable key'),
+                    'secret_key' => __('Secret key'),
                 ]
             )
         );
