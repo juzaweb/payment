@@ -10,10 +10,12 @@
 
 namespace Juzaweb\Modules\Payment\Services;
 
+use Juzaweb\Modules\Payment\Models\PaymentHistory;
+
 class PaymentResult
 {
     /**
-     * @var string
+     * @var null|string
      */
     protected ?string $transactionId = null;
 
@@ -26,6 +28,8 @@ class PaymentResult
      * @var bool
      */
     protected bool $isSuccessful = false;
+
+    protected ?PaymentHistory $paymentHistory = null;
 
     public function setSuccessful(bool $isSuccessful): self
     {
@@ -61,5 +65,17 @@ class PaymentResult
     public function getTransactionId(): ?string
     {
         return $this->transactionId;
+    }
+
+    public function setPaymentHistory(PaymentHistory $paymentHistory): self
+    {
+        $this->paymentHistory = $paymentHistory;
+
+        return $this;
+    }
+
+    public function getPaymentHistory(): ?PaymentHistory
+    {
+        return $this->paymentHistory;
     }
 }

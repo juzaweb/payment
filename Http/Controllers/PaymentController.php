@@ -44,6 +44,7 @@ class PaymentController extends ThemeController
                     [
                         'type' => 'embed',
                         'embed_url' => $payment->getRedirectUrl(),
+                        'payment_history_id' => $payment->getPaymentHistory()->id,
                     ]
                 );
             }
@@ -222,11 +223,26 @@ class PaymentController extends ThemeController
 
         throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
 
-        $paymentHistory->load(['paymentable']);
+        // $paymentHistory->load(['paymentable']);
 
         return view(
             'payment::method.embed',
             compact('module', 'paymentHistory')
+        );
+    }
+
+    public function status(string $module, string $transactionId)
+    {
+        $paymentHistory = PaymentHistory::find($transactionId);
+
+        throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
+
+        $paymentHistory->load(['paymentable']);
+
+        return $this->success(
+            [
+                'status' => $paymentHistory->status->value,
+            ]
         );
     }
 

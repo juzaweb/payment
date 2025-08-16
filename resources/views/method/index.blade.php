@@ -46,6 +46,7 @@
     <script>
         $(function () {
             const paymentForm = new PaymentForm(
+                'test',
                 '#payment-form',
                 {
                     stripePublishKey: '{{ $paymentMethods->where('driver', 'Stripe')->first()->config['publishable_key'] ?? '' }}',
@@ -55,6 +56,22 @@
                         'expiry_date': '{{ __('Expiry Date') }}',
                         'cvc': '{{ __('CVC') }}',
                         'stripe_publish_key_not_set': '{{ __('Stripe publish key is not set.') }}',
+                    },
+                    onSuccess: function (response) {
+                        show_notify({
+                            success: true,
+                            message: '{{ __('Payment request sent successfully!') }}',
+                        });
+
+                        $('#exampleModal').modal('hide');
+                    },
+                    onError: function (error) {
+                        show_notify({
+                            success: false,
+                            message: error.message || '{{ __('An error occurred while processing the payment request.') }}',
+                        });
+
+                        $('#exampleModal').modal('hide');
                     }
                 }
             );

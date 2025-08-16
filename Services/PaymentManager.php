@@ -82,6 +82,8 @@ class PaymentManager implements Contracts\PaymentManager
             event(new PaymentSuccess($paymentHistory->paymentable, $params));
         }
 
+        $purchase->setPaymentHistory($paymentHistory);
+
         return $purchase;
     }
 

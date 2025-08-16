@@ -10,7 +10,6 @@
 
 namespace Juzaweb\Modules\Payment\Services;
 
-use Illuminate\Support\Str;
 use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Contracts\Paymentable;
 use Juzaweb\Modules\Payment\Models\TestOrder;

@@ -17,8 +17,6 @@ class PurchaseResult extends PaymentResult
      */
     protected ?string $redirectUrl = null;
 
-    protected ?string $embedUrl = null;
-
     public static function make(?string $transactionId = null, string $redirectUrl = null, array $data = []): static
     {
         return new self($transactionId, $redirectUrl, $data);

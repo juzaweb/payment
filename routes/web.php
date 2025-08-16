@@ -10,3 +10,5 @@ Route::get('payment/{module}/cancel/{paymentHistoryId}', [PaymentController::cla
     ->name('payment.cancel');
 Route::get('payment/{module}/embed/{paymentHistoryId}', [PaymentController::class, 'embed'])
     ->name('payment.embed');
+Route::get('payment/{module}/status/{paymentHistoryId}', [PaymentController::class, 'status'])
+    ->name('payment.status');
