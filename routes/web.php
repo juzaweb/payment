@@ -8,5 +8,5 @@ Route::get('payment/{module}/return/{paymentHistoryId}', [PaymentController::cla
     ->name('payment.return');
 Route::get('payment/{module}/cancel/{paymentHistoryId}', [PaymentController::class, 'cancel'])
     ->name('payment.cancel');
-Route::get('payment/{module}/status/{paymentHistoryId}', [PaymentController::class, 'embed'])
+Route::get('payment/{module}/embed/{paymentHistoryId}', [PaymentController::class, 'embed'])
     ->name('payment.embed');

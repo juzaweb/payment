@@ -54,9 +54,9 @@ class PaymentManager implements Contracts\PaymentManager
         $paymentHistory->save();
 
         $config = $paymentMethod->getConfig();
-
         $purchase = $this->driver($paymentMethod->driver, $config)->purchase(
             [
+                ...$params,
                 'code' => $order->getCode(),
                 'amount' => $order->getTotalAmount(),
                 'currency' => $order->getCurrency(),

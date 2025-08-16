@@ -203,6 +203,10 @@ class PaymentController extends ThemeController
     {
         $paymentHistory = PaymentHistory::find($transactionId);
 
+        throw_if($paymentHistory == null, new PaymentException(__('Payment transaction not found!')));
+
+        $paymentHistory->load(['paymentable']);
+
         return view(
             'payment::method.embed',
             compact('module', 'paymentHistory')

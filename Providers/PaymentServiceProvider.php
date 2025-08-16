@@ -52,6 +52,16 @@ class PaymentServiceProvider extends ServiceProvider
                 false
             )
         );
+
+        $this->app[PaymentManager::class]->registerDriver(
+            'Stripe',
+            fn () => new PaymentDriverAdapter(
+                Methods\Stripe::class,
+                [
+                    'apiKey' => __('API Key'),
+                ]
+            )
+        );
     }
 
     /**

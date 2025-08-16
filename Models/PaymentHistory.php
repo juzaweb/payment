@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
+use Juzaweb\Modules\Payment\Contracts\Paymentable;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 
 class PaymentHistory extends Model
@@ -42,6 +43,11 @@ class PaymentHistory extends Model
         return $this->morphTo(__FUNCTION__, 'payer_type', 'payer_id');
     }
 
+    /**
+     * Get the paymentable model (e.g., Order, Subscription, etc.)
+     *
+     * @return MorphTo|Paymentable
+     */
     public function paymentable(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'paymentable_type', 'paymentable_id');

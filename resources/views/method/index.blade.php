@@ -40,11 +40,42 @@
 @endsection
 
 @section('scripts')
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="{{ asset('payment.js') }}"></script>
+
+    <script>
+        $(function () {
+            const stripe = Stripe("pk_test_51RuZNjA3YeRZ6FZ0JEqSjDvTRI54sz4DEeYkapkBMuFx8XuJJAE35HKr6X85eoxanMAJXcgafwWG7nU5rOJn4iEN00JCQpJLF4");
+            const elements = stripe.elements();
+            const card = elements.create("card");
+            card.mount("#card-element");
+
+            const form = document.getElementById("payment-form");
+            form.addEventListener("submit", async function(e) {
+                const {token, error} = await stripe.createToken(card);
+
+                if (error) {
+                    alert(error.message);
+                } else {
+                    // Thêm token vào form trước khi submit
+                    const hiddenInput = document.createElement("input");
+                    hiddenInput.setAttribute("type", "hidden");
+                    hiddenInput.setAttribute("name", "token");
+                    hiddenInput.setAttribute("value", token.id);
+                    form.appendChild(hiddenInput);
+                }
+            });
+        });
+    </script>
 
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
-            <form method="post" action="{{ route('payment.purchase', ['test']) }}" class="form-ajax" data-success="handlePaymentSuccess">
+            <form method="post"
+                  action="{{ route('payment.purchase', ['test']) }}"
+                  class="form-ajax"
+                  data-success="handlePaymentSuccess"
+                  id="payment-form"
+            >
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">{{ __('Test Payment') }}</h5>
@@ -63,6 +94,8 @@
                             ) }}
 
                             {{ Field::text(__('Amount'), 'amount', ['value' => 10]) }}
+
+                            <div id="card-element"><!-- Stripe.js sẽ mount thẻ card input vào đây --></div>
 
                             <button type="submit" class="btn btn-primary">Send Payment Request</button>
                         </div>
