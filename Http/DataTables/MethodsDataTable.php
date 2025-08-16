@@ -25,7 +25,7 @@ class MethodsDataTable extends DataTable
 
     public function query(PaymentMethod $model): Builder
     {
-        return $model->newQuery()->filter(request()->all());
+        return $model->newQuery()->withTranslation()->filter(request()->all());
     }
 
     public function getColumns(): array

@@ -60,6 +60,7 @@ class PaymentServiceProvider extends ServiceProvider
                 [
                     'publishable_key' => __('Publishable key'),
                     'secret_key' => __('Secret key'),
+                    'webhook_secret' => __('Webhook secret'),
                 ]
             )
         );

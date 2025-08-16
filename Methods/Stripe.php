@@ -88,9 +88,7 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
         $sigHeader = $request->headers->get('stripe-signature');
 
         try {
-            $event = Webhook::constructEvent(
-                $payload, $sigHeader, 'whsec_TbTC0wsspTjhQWxPQLywVLTj2YugpCci'
-            );
+            $event = Webhook::constructEvent($payload, $sigHeader, $this->config['webhook_secret']);
 
             if ($event->type === 'payment_intent.succeeded') {
                 $paymentIntent = $event->data->object;
