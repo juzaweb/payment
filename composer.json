@@ -19,5 +19,10 @@
         "larabizcms/for-dev": "^1.0",
         "larabizcms/gtranslate": "^1.0",
         "juzaweb/core": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Juzaweb\\Modules\\Payment\\": "src/"
+        }
     }
 }
