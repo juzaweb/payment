@@ -76,7 +76,7 @@ class PaymentServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->singleton(
@@ -101,9 +101,9 @@ class PaymentServiceProvider extends ServiceProvider
     protected function registerConfig(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/payment.php' => config_path('payment.php'),
+            __DIR__ . '/../../config/payment.php' => config_path('payment.php'),
         ], 'config');
-        $this->mergeConfigFrom(__DIR__ . '/../config/payment.php', 'payment');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/payment.php', 'payment');
     }
 
     /**

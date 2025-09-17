@@ -45,6 +45,7 @@ class PaymentController extends ThemeController
                         'type' => 'embed',
                         'embed_url' => $payment->getRedirectUrl(),
                         'payment_history_id' => $payment->getPaymentHistory()->id,
+                        'order_id' => $payment->getPaymentHistory()->paymentable_id,
                     ]
                 );
             }

@@ -29,7 +29,15 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
 
     public function purchase(array $params): PurchaseResult
     {
-        $response = $this->createGateway()->purchase($params)->send();
+        $response = $this->createGateway()->purchase(
+            [
+                'amount' => $params['amount'],
+                'currency' => $params['currency'],
+                'returnUrl' => $params['returnUrl'],
+                'cancelUrl' => $params['cancelUrl'],
+                'description' => $params['description'],
+            ]
+        )->send();
 
         if (! in_array($response->getCode(), [200, 201])) {
             throw new PaymentException(

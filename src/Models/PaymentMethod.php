@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Modules\Payment\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
 use Juzaweb\Core\Traits\Translatable;
@@ -37,6 +38,11 @@ class PaymentMethod extends Model
     protected $hidden = [
         'config',
     ];
+
+    public function scopeWhereActive(Builder $builder, $active = true): Builder
+    {
+        return $builder->where('active', $active);
+    }
 
     public function getSandboxAttribute(): bool
     {
