@@ -70,6 +70,14 @@ class PaymentServiceProvider extends ServiceProvider
         );
 
         $this->app[PaymentManager::class]->registerDriver(
+            'Test',
+            fn() => new PaymentDriverAdapter(
+                Methods\Test::class,
+                [] // No configuration needed
+            )
+        );
+
+        $this->app[PaymentManager::class]->registerDriver(
             'Custom',
             fn() => new PaymentDriverAdapter(
                 Methods\Custom::class,
