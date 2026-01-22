@@ -22,12 +22,17 @@ return new class extends Migration
                 $table->string('paymentable_id');
                 $table->uuidMorphs('payer');
                 $table->string('payment_id', 150)->nullable();
+                $table->uuid('method_id')->nullable();
                 $table->string('payment_method', 50)->nullable();
                 $table->string('status', 50)->default('processing');
                 $table->json('data')->nullable();
-                $table->timestamps();
+                $table->datetimes();
 
                 $table->index(['paymentable_type', 'paymentable_id']);
+                $table->foreign('method_id')
+                    ->references('id')
+                    ->on('payment_methods')
+                    ->onDelete('set null');
                 $table->foreign('payment_method')
                     ->references('driver')
                     ->on('payment_methods')

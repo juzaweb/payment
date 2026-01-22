@@ -1,5 +1,5 @@
 @foreach($fields as $name => $label)
-    {{ Field::text($label, "config[{$name}]", ['value' => $config[$name] ?? null]) }}
+    {{ Field::security($label, "config[{$name}]", ['value' => $config[$name] ?? null]) }}
 @endforeach
 
 @if($hasSandbox)

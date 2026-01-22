@@ -11,7 +11,7 @@
 namespace Juzaweb\Modules\Payment\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Juzaweb\Core\Models\Model;
+use Juzaweb\Modules\Core\Models\Model;
 
 class PaymentMethodTranslation extends Model
 {

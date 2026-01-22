@@ -17,15 +17,13 @@ class PaymentMethodRequest extends FormRequest
 {
     public function rules(): array
     {
-        $locale = $this->getFormLanguage();
-
         return [
 			'driver' => [
                 Rule::requiredIf(!$this->route('id')),
                 Rule::in(array_keys(PaymentManager::drivers()))
             ],
-			"{$locale}.name" => ['required', 'string', 'max:200'],
-			"{$locale}.description" => ['nullable', 'string', 'max:500'],
+			'name' => ['required', 'string', 'max:200'],
+			'description' => ['nullable', 'string', 'max:500'],
             'locale' => ['required', 'string', 'max:10', 'exists:languages,code'],
 			'config' => ['required', 'array'],
 			'active' => ['required', 'boolean'],

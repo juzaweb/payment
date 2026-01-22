@@ -1,4 +1,5 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
@@ -24,12 +25,14 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
 {
     protected bool $returnInEmbed = true;
 
-    public function __construct(protected array $config)
-    {
-    }
+    public function __construct(protected array $config) {}
 
     public function purchase(array $params): PurchaseResult
     {
+        if (isset($params['payment_method'])) {
+            $params['confirm'] = true;
+        }
+
         $response = $this->createGateway()->purchase($params)->send();
 
         if (isset($response->getData()['error']) && $response->getData()['error']) {
@@ -88,7 +91,11 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
         $sigHeader = $request->headers->get('stripe-signature');
 
         try {
-            $event = Webhook::constructEvent($payload, $sigHeader, $this->config['webhook_secret']);
+            $webhookSecret = (bool) ($this->config['sandbox'] ?? false)
+                ? $this->config['sandbox_webhook_secret']
+                : $this->config['live_webhook_secret'];
+
+            $event = Webhook::constructEvent($payload, $sigHeader, $webhookSecret);
 
             if ($event->type === 'payment_intent.succeeded') {
                 $paymentIntent = $event->data->object;
@@ -121,10 +128,17 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
     protected function createGateway(): GatewayInterface
     {
         $gateway = Omnipay::create('Stripe\PaymentIntents');
-        $gateway->setApiKey($this->config['secret_key']);
-        if (isset($this->config['sandbox']) && $this->config['sandbox']) {
+
+        $isSandbox = (bool) ($this->config['sandbox'] ?? false);
+
+        if ($isSandbox) {
+            $gateway->setApiKey($this->config['sandbox_secret_key']);
             $gateway->setTestMode(true);
+        } else {
+            $gateway->setApiKey($this->config['live_secret_key']);
+            $gateway->setTestMode(false);
         }
+
         return $gateway;
     }
 }

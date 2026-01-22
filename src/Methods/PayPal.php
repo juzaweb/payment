@@ -1,4 +1,5 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
@@ -23,9 +24,7 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
 {
     protected string $driver = 'PayPal_Rest';
 
-    public function __construct(protected array $config)
-    {
-    }
+    public function __construct(protected array $config) {}
 
     public function purchase(array $params): PurchaseResult
     {
@@ -73,10 +72,24 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
     protected function createGateway(): GatewayInterface
     {
         $gateway = Omnipay::create($this->driver);
-        $gateway->initialize(Arr::except($this->config, ['sandbox', 'token']));
-        if (isset($this->config['sandbox']) && $this->config['sandbox']) {
-            $gateway->setTestMode(true);
+
+        $isSandbox = (bool) ($this->config['sandbox'] ?? false);
+        if ($isSandbox) {
+            $config = [
+                'clientId' => $this->config['sandbox_client_id'] ?? '',
+                'secret' => $this->config['sandbox_secret'] ?? '',
+                'testMode' => true,
+            ];
+        } else {
+            $config = [
+                'clientId' => $this->config['live_client_id'] ?? '',
+                'secret' => $this->config['live_secret'] ?? '',
+                'testMode' => false,
+            ];
         }
+
+        $gateway->initialize($config);
+
         return $gateway;
     }
 }

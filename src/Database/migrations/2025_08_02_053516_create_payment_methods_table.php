@@ -16,11 +16,11 @@ return new class extends Migration
         Schema::create(
             'payment_methods',
             function (Blueprint $table) {
-                $table->id();
-                $table->string('driver', 50)->index();
+                $table->uuid('id')->primary();
+                $table->string('driver', 50)->unique();
                 $table->json('config')->nullable();
-                $table->boolean('active')->default(true);
-                $table->timestamps();
+                $table->boolean('active')->index()->default(true);
+                $table->datetimes();
             }
         );
 
@@ -28,13 +28,13 @@ return new class extends Migration
             'payment_method_translations',
             function (Blueprint $table) {
                 $table->id();
+                $table->uuid('payment_method_id')->index();
+                $table->string('locale', 10)->index();
                 $table->string('name');
                 $table->text('description')->nullable();
-                $table->unsignedBigInteger('payment_method_id')->index();
-                $table->string('locale', 5)->index();
-                $table->timestamps();
-
                 $table->unique(['payment_method_id', 'locale'], 'payment_method_locale_unique');
+                $table->datetimes();
+
                 $table->foreign('payment_method_id')
                     ->references('id')
                     ->on('payment_methods')

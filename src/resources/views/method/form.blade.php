@@ -8,11 +8,11 @@
 
         <div class="row">
             <div class="col-md-12">
-                <a href="{{ admin_url('payment-methods') }}" class="btn btn-warning">
+                <a href="{{ $backUrl }}" class="btn btn-warning">
                     <i class="fas fa-arrow-left"></i> {{ __('Back') }}
                 </a>
 
-                <button class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> {{ __('Save') }}
                 </button>
             </div>
@@ -32,17 +32,17 @@
                             ]
                         )->disabled($model->exists) }}
 
-                        {{ Field::text($model, "{$locale}[name]", ['id' => 'name', 'value' => $model->name, 'label' => __('Name')]) }}
+                        {{ Field::text($model, "name", ['id' => 'name', 'value' => $model->name, 'label' => __('Name')]) }}
 
-                        {{ Field::textarea($model, "{$locale}[description]", ['value' => $model->description, 'label' => __('Description')]) }}
-
-                        {{ Field::checkbox($model, 'active', ['value' => $model->active ?? 1]) }}
+                        {{ Field::textarea($model, "description", ['value' => $model->description, 'label' => __('Description')]) }}
                     </div>
                 </div>
             </div>
 
             <div class="col-md-3">
                 <x-language-card :label="$model" :locale="$locale" />
+
+                {{ Field::checkbox($model, 'active', ['value' => $model->active ?? 1]) }}
             </div>
 
             <div class="col-md-12 @if(! $model->exists) d-none @endif" id="config-form">
@@ -62,7 +62,7 @@
 @endsection
 
 @section('scripts')
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{ csp_script_nonce() }}">
         $(function () {
             $('#driver').on('change', function () {
                 let driver = $(this).val();

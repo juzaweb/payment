@@ -27,4 +27,6 @@ interface PaymentManager
     public function config(string $driver): array;
 
     public function renderConfig(string $driver, array $config = []): string;
+
+    public function hasModule(string $module): bool;
 }

@@ -12,7 +12,9 @@ namespace Juzaweb\Modules\Payment\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Juzaweb\Modules\Core\Rules\ModelExists;
 use Juzaweb\Modules\Payment\Facades\PaymentManager;
+use Juzaweb\Modules\Payment\Models\Order;
 
 class PaymentRequest extends FormRequest
 {
@@ -22,6 +24,7 @@ class PaymentRequest extends FormRequest
 
         return [
             'method' => ['required', 'string', Rule::in($methods)],
+            'order_id' => ['required', 'string', new ModelExists(Order::class, 'id')],
         ];
     }
 }

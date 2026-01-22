@@ -3,15 +3,18 @@
 namespace Juzaweb\Modules\Payment\Models;
 
 use Illuminate\Database\Eloquent\Builder;
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
-use Juzaweb\Core\Traits\Translatable;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Juzaweb\Modules\Admin\Models\Website;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
+use Juzaweb\Modules\Core\Traits\Translatable;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Facades\PaymentManager;
 
 class PaymentMethod extends Model
 {
-    use HasAPI, Translatable;
+    use HasAPI, Translatable, HasUuids;
 
     protected $table = 'payment_methods';
 
@@ -33,13 +36,14 @@ class PaymentMethod extends Model
     public $translatedAttributes = [
         'name',
         'description',
+        'locale',
     ];
 
     protected $hidden = [
         'config',
     ];
 
-    public function scopeWhereActive(Builder $builder, $active = true): Builder
+    public function scopeWhereActive(Builder $builder, bool $active = true): Builder
     {
         return $builder->where('active', $active);
     }

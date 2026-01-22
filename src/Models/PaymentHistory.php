@@ -5,8 +5,9 @@ namespace Juzaweb\Modules\Payment\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
+use Juzaweb\Modules\Admin\Models\Website;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Payment\Contracts\Paymentable;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 
@@ -17,6 +18,7 @@ class PaymentHistory extends Model
     protected $table = 'payment_histories';
 
     protected $fillable = [
+        'method_id',
         'payment_method',
         'status',
         'data',
@@ -34,6 +36,11 @@ class PaymentHistory extends Model
     ];
 
     public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
+    }
+
+    public function paymentMethodByDriver(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'payment_method', 'driver');
     }

@@ -5,21 +5,55 @@ namespace Juzaweb\Modules\Payment\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Juzaweb\Core\Http\Controllers\ThemeController;
+use Juzaweb\Modules\Core\Http\Controllers\ThemeController;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 use Juzaweb\Modules\Payment\Events\PaymentFail;
 use Juzaweb\Modules\Payment\Events\PaymentSuccess;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Facades\PaymentManager;
+use Juzaweb\Modules\Payment\Http\Requests\CheckoutRequest;
 use Juzaweb\Modules\Payment\Http\Requests\PaymentRequest;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
 class PaymentController extends ThemeController
 {
+    public function checkout(CheckoutRequest $request, string $module)
+    {
+        abort_if(PaymentManager::hasModule($module) === false, 404, __('Payment module not found!'));
+
+        $handler = PaymentManager::module($module);
+
+        try {
+            $order = DB::transaction(function () use ($handler, $request) {
+                return $handler->createOrder($request->all());
+            });
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage());
+        }
+
+        $method = PaymentMethod::where('driver', $request->get('method'))
+            ->where('active', true)
+            ->first();
+
+        if (!$method) {
+            return $this->error(__('Payment method not found!'));
+        }
+
+        return $this->success([
+            'order_id' => $order->id,
+            'order_code' => $order->getCode(),
+            'payment_method' => $method->driver,
+            'amount' => $order->getTotalAmount(),
+            'currency' => $order->getCurrency(),
+        ]);
+    }
+
     public function purchase(PaymentRequest $request, string $module)
     {
-        $user = $request->user();
+        abort_if(PaymentManager::hasModule($module) === false, 404, __('Payment module not found!'));
+
+        $user = $request->currentActor();
         $method = PaymentMethod::where('driver', $request->get('method'))
             ->where('active', true)
             ->first();
@@ -27,7 +61,13 @@ class PaymentController extends ThemeController
         try {
             $payment = DB::transaction(
                 function () use ($module, $request, $user, $method) {
-                    return PaymentManager::create($user, $module, $method, $request->all());
+                    return PaymentManager::create(
+                        $user,
+                        $module,
+                        $method,
+                        $request->post('order_id'),
+                        $request->all()
+                    );
                 }
             );
         } catch (PaymentException $e) {

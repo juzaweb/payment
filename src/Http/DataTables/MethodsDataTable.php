@@ -12,10 +12,10 @@ namespace Juzaweb\Modules\Payment\Http\DataTables;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Juzaweb\Core\DataTables\Action;
-use Juzaweb\Core\DataTables\BulkAction;
-use Juzaweb\Core\DataTables\Column;
-use Juzaweb\Core\DataTables\DataTable;
+use Juzaweb\Modules\Core\DataTables\Action;
+use Juzaweb\Modules\Core\DataTables\BulkAction;
+use Juzaweb\Modules\Core\DataTables\Column;
+use Juzaweb\Modules\Core\DataTables\DataTable;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
 use Yajra\DataTables\EloquentDataTable;
 

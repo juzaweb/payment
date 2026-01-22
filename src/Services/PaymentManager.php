@@ -1,4 +1,5 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
@@ -10,8 +11,8 @@
 
 namespace Juzaweb\Modules\Payment\Services;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use InvalidArgumentException;
-use Juzaweb\Core\Models\User;
 use Juzaweb\Modules\Payment\Contracts;
 use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
@@ -19,6 +20,7 @@ use Juzaweb\Modules\Payment\Events\PaymentCancel;
 use Juzaweb\Modules\Payment\Events\PaymentFail;
 use Juzaweb\Modules\Payment\Events\PaymentSuccess;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
+use Juzaweb\Modules\Payment\Models\Order;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
 
@@ -28,10 +30,17 @@ class PaymentManager implements Contracts\PaymentManager
 
     protected array $modules = [];
 
-    public function create(User $user, string $module, string|PaymentMethod $paymentMethod, array $params): PurchaseResult
-    {
+    public function create(
+        Authenticatable $user,
+        string $module,
+        string|PaymentMethod $paymentMethod,
+        string $orderId,
+        array $params
+    ): PurchaseResult {
         $handler = $this->module($module);
-        $order = $handler->createOrder($params);
+
+        // Get existing order
+        $order = Order::findOrFail($orderId);
 
         if (!$paymentMethod instanceof PaymentMethod) {
             $paymentMethod = PaymentMethod::where('driver', $paymentMethod)
@@ -43,6 +52,7 @@ class PaymentManager implements Contracts\PaymentManager
 
         $paymentHistory = new PaymentHistory(
             [
+                'method_id' => $paymentMethod->id,
                 'payment_method' => $paymentMethod->driver,
                 'module' => $module,
                 'status' => PaymentHistoryStatus::PROCESSING,
@@ -155,7 +165,7 @@ class PaymentManager implements Contracts\PaymentManager
     public function drivers(): array
     {
         return collect(array_keys($this->drivers))
-            ->mapWithKeys(fn ($driver) => [
+            ->mapWithKeys(fn($driver) => [
                 $driver => title_from_key($driver),
             ])
             ->all();
@@ -211,5 +221,10 @@ class PaymentManager implements Contracts\PaymentManager
         }
 
         return $this->modules[$module];
+    }
+
+    public function hasModule(string $module): bool
+    {
+        return isset($this->modules[$module]);
     }
 }
