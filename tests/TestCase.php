@@ -1,6 +1,6 @@
 <?php
 
-namespace Juzaweb\Modules\Blog\Tests;
+namespace Juzaweb\Modules\Payment\Tests;
 
 use Juzaweb\Modules\Core\Providers\CoreServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
