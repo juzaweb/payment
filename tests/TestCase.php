@@ -24,9 +24,7 @@ abstract class TestCase extends Orchestra
         }
 
         // Load and alias UserFactory
-        $factoryPath = __DIR__ . '/../database/factories/UserFactory.php';
-        if (file_exists($factoryPath)) {
-            require_once $factoryPath;
+        if (class_exists('Juzaweb\\Modules\\Core\\Database\\Factories\\UserFactory')) {
             if (!class_exists('Juzaweb\\Modules\\Admin\\Database\\Factories\\UserFactory')) {
                 class_alias(
                     'Juzaweb\\Modules\\Core\\Database\\Factories\\UserFactory',
@@ -94,6 +92,8 @@ abstract class TestCase extends Orchestra
             \Juzaweb\Modules\Core\Permissions\PermissionServiceProvider::class,
             \Pion\Laravel\ChunkUpload\Providers\ChunkUploadServiceProvider::class,
             \Yajra\DataTables\DataTablesServiceProvider::class,
+            \Yajra\DataTables\ButtonsServiceProvider::class,
+            \Yajra\DataTables\HtmlServiceProvider::class,
             \Juzaweb\Modules\Payment\Providers\PaymentServiceProvider::class,
         ];
     }
