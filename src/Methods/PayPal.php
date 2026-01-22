@@ -13,12 +13,15 @@ namespace Juzaweb\Modules\Payment\Methods;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Omnipay;
+use Omnipay\PayPal\Message\RestTokenRequest;
 
 class PayPal extends PaymentGateway implements PaymentGatewayInterface
 {
@@ -65,8 +68,95 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
 
     public function handleWebhook(Request $request): ?CompleteResult
     {
-        // TODO: Implement handleWebhook() method.
+        $payload = json_decode($request->getContent(), true);
+
+        if (!is_array($payload) || empty($payload['event_type'])) {
+            return null;
+        }
+
+        if (!$this->verifyWebhookSignature($request, $payload)) {
+            Log::error('PayPal Signature Verification Failed');
+            return null;
+        }
+
+        if (in_array($payload['event_type'], ['PAYMENT.SALE.COMPLETED', 'PAYMENT.CAPTURE.COMPLETED'])) {
+            $resource = $payload['resource'];
+            $transactionId = $resource['parent_payment'] ?? $resource['id'];
+
+            return CompleteResult::make(
+                $transactionId,
+                true,
+                $payload
+            );
+        }
+
+        if ($payload['event_type'] === 'PAYMENT.SALE.DENIED') {
+            $resource = $payload['resource'];
+            $transactionId = $resource['parent_payment'] ?? $resource['id'];
+
+            return CompleteResult::make(
+                $transactionId,
+                false,
+                $payload
+            );
+        }
+
         return null;
+    }
+
+    protected function verifyWebhookSignature(Request $request, array $payload): bool
+    {
+        $isSandbox = (bool) ($this->config['sandbox'] ?? false);
+        $webhookId = $isSandbox
+            ? ($this->config['sandbox_webhook_id'] ?? '')
+            : ($this->config['live_webhook_id'] ?? '');
+
+        if (empty($webhookId)) {
+            return false;
+        }
+
+        try {
+            $gateway = $this->createGateway();
+            $tokenRequest = new RestTokenRequest($gateway->getHttpClient(), $gateway->getHttpRequest());
+            $tokenRequest->initialize($gateway->getParameters());
+            $response = $tokenRequest->send();
+
+            if (!$response->isSuccessful()) {
+                Log::error('PayPal Token Error: ' . $response->getMessage());
+                return false;
+            }
+
+            $accessToken = $response->getData()['access_token'];
+
+            $verifyPayload = [
+                'auth_algo' => $request->header('PAYPAL-AUTH-ALGO'),
+                'cert_url' => $request->header('PAYPAL-CERT-URL'),
+                'transmission_id' => $request->header('PAYPAL-TRANSMISSION-ID'),
+                'transmission_sig' => $request->header('PAYPAL-TRANSMISSION-SIG'),
+                'transmission_time' => $request->header('PAYPAL-TRANSMISSION-TIME'),
+                'webhook_id' => $webhookId,
+                'webhook_event' => $payload
+            ];
+
+            $apiUrl = $isSandbox
+                ? 'https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature'
+                : 'https://api-m.paypal.com/v1/notifications/verify-webhook-signature';
+
+            $verifyResponse = Http::withToken($accessToken)
+                ->post($apiUrl, $verifyPayload);
+
+            if ($verifyResponse->successful()) {
+                $data = $verifyResponse->json();
+                return isset($data['verification_status']) && $data['verification_status'] === 'SUCCESS';
+            }
+
+            Log::error('PayPal Verify Error: ' . $verifyResponse->body());
+        } catch (\Exception $e) {
+            Log::error('PayPal Webhook Exception: ' . $e->getMessage());
+            return false;
+        }
+
+        return false;
     }
 
     protected function createGateway(): GatewayInterface

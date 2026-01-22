@@ -35,8 +35,10 @@ class PaymentServiceProvider extends ServiceProvider
                 [
                     'sandbox_client_id' => __('Sandbox Client ID'),
                     'sandbox_secret' => __('Sandbox Secret'),
+                    'sandbox_webhook_id' => __('Sandbox Webhook ID'),
                     'live_client_id' => __('Live Client ID'),
                     'live_secret' => __('Live Secret'),
+                    'live_webhook_id' => __('Live Webhook ID'),
                 ]
             )
         );
