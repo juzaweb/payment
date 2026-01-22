@@ -21,7 +21,7 @@ class OrderController extends AdminController
         );
     }
 
-    public function edit($siteId, $id)
+    public function edit(string $id)
     {
         Breadcrumb::add(__('Orders'), admin_url('orders'));
 
@@ -33,14 +33,14 @@ class OrderController extends AdminController
         return view(
             'payment::order.form',
             [
-                'action' => action([static::class, 'update'], [$siteId, $id]),
+                'action' => action([static::class, 'update'], [$id]),
                 'model' => $model,
                 'backUrl' => $backUrl,
             ]
         );
     }
 
-    public function update(OrderRequest $request, $siteId, $id)
+    public function update(OrderRequest $request, string $id)
     {
         $model = Order::findOrFail($id);
 

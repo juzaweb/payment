@@ -15,7 +15,6 @@ class OrderRouteTest extends TestCase
         parent::setUp();
         // Create an admin user
         $this->actingAs(User::factory()->create(['is_super_admin' => 1]));
-        URL::defaults(['websiteId' => 1]);
     }
 
     public function test_index_route_exists()
