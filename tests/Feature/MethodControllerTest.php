@@ -9,7 +9,7 @@ use Juzaweb\Modules\Payment\Models\PaymentMethod;
 class MethodControllerTest extends TestCase
 {
     protected $user;
-    protected $baseUrl = 'admin/1/payment-methods';
+    protected $baseUrl = 'admin/payment-methods';
 
     protected function setUp(): void
     {
