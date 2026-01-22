@@ -94,6 +94,7 @@ abstract class TestCase extends Orchestra
             \Juzaweb\Modules\Core\Permissions\PermissionServiceProvider::class,
             \Pion\Laravel\ChunkUpload\Providers\ChunkUploadServiceProvider::class,
             \Yajra\DataTables\DataTablesServiceProvider::class,
+            \Juzaweb\Modules\Payment\Providers\PaymentServiceProvider::class,
         ];
     }
 
