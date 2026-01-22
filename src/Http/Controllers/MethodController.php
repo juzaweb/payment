@@ -27,7 +27,7 @@ class MethodController extends AdminController
     {
         Breadcrumb::add(__('Payment Methods'));
 
-        $createUrl = action([static::class, 'create']);
+        $createUrl = action([static::class, 'create'], ['websiteId' => request()->route('websiteId')]);
         $paymentMethods = PaymentMethod::withTranslation()
             ->where('active', true)
             ->get();
@@ -50,17 +50,17 @@ class MethodController extends AdminController
         Breadcrumb::add(__('Create Payment Method'));
 
         $locale = $this->getFormLanguage();
-        $backUrl = action([static::class, 'index']);
+        $backUrl = action([static::class, 'index'], ['websiteId' => request()->route('websiteId')]);
 
         return view('payment::method.form', [
             'model' => new PaymentMethod(),
-            'action' => action([static::class, 'store']),
+            'action' => action([static::class, 'store'], ['websiteId' => request()->route('websiteId')]),
             'locale' => $locale,
             'backUrl' => $backUrl,
         ]);
     }
 
-    public function edit(Request $request, string $id)
+    public function edit(Request $request, $websiteId, string $id)
     {
         $method = PaymentMethod::findOrFail($id);
 
@@ -70,11 +70,11 @@ class MethodController extends AdminController
 
         $locale = $this->getFormLanguage();
         $method->setDefaultLocale($locale);
-        $backUrl = action([static::class, 'index']);
+        $backUrl = action([static::class, 'index'], ['websiteId' => $request->route('websiteId')]);
 
         return view('payment::method.form', [
             'model' => $method,
-            'action' => action([static::class, 'update'], [$id]),
+            'action' => action([static::class, 'update'], [$id, 'websiteId' => $request->route('websiteId')]),
             'locale' => $locale,
             'backUrl' => $backUrl,
         ]);
@@ -95,7 +95,7 @@ class MethodController extends AdminController
         return $this->success(__('Payment method saved successfully.'));
     }
 
-    public function update(PaymentMethodRequest $request, string $id)
+    public function update(PaymentMethodRequest $request, $websiteId, string $id)
     {
         $locale = $this->getFormLanguage();
         DB::transaction(
@@ -118,7 +118,7 @@ class MethodController extends AdminController
         );
     }
 
-    public function getData(string $driver): JsonResponse
+    public function getData($websiteId, string $driver): JsonResponse
     {
         return response()->json([
             'config' => PaymentManager::renderConfig($driver),
