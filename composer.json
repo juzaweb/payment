@@ -16,11 +16,17 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0.1",
-        "juzaweb/core": "dev-master"
+        "juzaweb/core": "dev-master",
+        "orchestra/testbench": "^9.16"
     },
     "autoload": {
         "psr-4": {
             "Juzaweb\\Modules\\Payment\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Juzaweb\\Modules\\Payment\\Tests\\": "tests/"
         }
     }
 }
