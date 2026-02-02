@@ -49,3 +49,10 @@ mix.combine(
     ],
     `${basePublish}/js/thankyou.min.js`
 );
+
+mix.combine(
+    [
+        baseAsset + '/js/payment.js',
+    ],
+    `${basePublish}/js/payment.min.js`
+);
