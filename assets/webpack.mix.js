@@ -4,8 +4,8 @@ const path = require('path');
 mix.disableNotifications();
 mix.version();
 
-const baseAsset = path.dirname(__filename, '');
-const basePublish = 'public/modules/payment';
+const baseAsset = path.relative(process.cwd(), __dirname);
+const basePublish = baseAsset + '/public';
 
 mix.setPublicPath(basePublish);
 
