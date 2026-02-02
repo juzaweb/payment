@@ -4,7 +4,7 @@ class PaymentForm {
     constructor(module, element = '#payment-form', options = {}) {
         this.module = module;
         this.element = element;
-        this.paymentMethod = $('#method');
+        this.paymentMethod = $('[name="method"]');
         this.options = options;
         this.init();
     }
@@ -34,7 +34,7 @@ class PaymentForm {
             }
 
             if (formData.get('method') === 'Stripe') {
-                const {token, error} = await self.getStripe().createToken(
+                const { token, error } = await self.getStripe().createToken(
                     self.cardNumber,
                     {
                         name: document.getElementById('cardholder-name').value
@@ -42,7 +42,7 @@ class PaymentForm {
                 );
 
                 if (error) {
-                    self.sendMessageByResponse({success: false, message: error.message});
+                    self.sendMessageByResponse({ success: false, message: error.message });
                 } else {
                     // Thêm token vào form trước khi submit
                     formData.set('token', token.id);
@@ -88,7 +88,7 @@ class PaymentForm {
                         } else {
                             form.html(htm);
                         }
-                        
+
                         self.checkStatus(response.payment_history_id);
 
                         return false;
@@ -117,7 +117,7 @@ class PaymentForm {
             });
         });
 
-        this.paymentMethod.on('change', function(e) {
+        this.paymentMethod.on('change', function (e) {
             let method = $(this).val();
 
             if (method === 'Stripe') {
@@ -173,7 +173,7 @@ class PaymentForm {
 
                 // Validation errors
                 [self.cardNumber, self.cardExpiry, self.cardCvc].forEach(element => {
-                    element.on("change", function(event) {
+                    element.on("change", function (event) {
                         const displayError = document.getElementById("card-errors");
                         displayError.textContent = event.error ? event.error.message : "";
                     });
@@ -189,30 +189,30 @@ class PaymentForm {
 
     checkStatus(paymentHistoryId) {
         const self = this;
-        
-        let interval = setInterval(function() {
+
+        let interval = setInterval(function () {
             $.ajax({
                 type: 'GET',
                 url: `/payment/${self.module}/status/${paymentHistoryId}`,
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     let status = response.status;
-                    
+
                     if (status === 'pending' || status === 'processing') {
                         return;
                     }
-                    
+
                     if (self.options.onSuccess && status === 'success') {
                         self.options.onSuccess(response);
                     }
-                    
+
                     if (status === 'failed' && self.options.onError) {
                         self.options.onError(response);
                     }
 
                     clearInterval(interval);
                 }.bind(this),
-                error: function(jqxhr) {
+                error: function (jqxhr) {
                     if (self.options.onError) {
                         self.options.onError(jqxhr);
                     }
@@ -226,7 +226,7 @@ class PaymentForm {
     sendMessageByResponse(response) {
         let msg = get_message_response(response);
         console.log(msg);
-        if (! msg) {
+        if (!msg) {
             return;
         }
 
@@ -239,7 +239,7 @@ class PaymentForm {
         }
 
         if (!this.options.stripePublishKey) {
-            this.sendMessageByResponse({success: false, message: this.options.language.stripe_publish_key_not_set});
+            this.sendMessageByResponse({ success: false, message: this.options.language.stripe_publish_key_not_set });
             return null;
         }
 
