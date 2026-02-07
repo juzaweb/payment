@@ -17,11 +17,7 @@ class PaymentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->booted(
-            function () {
-                $this->registerMenu();
-            }
-        );
+        $this->registerMenu();
 
         // $this->app[PaymentManager::class]->registerModule(
         //     'test',
