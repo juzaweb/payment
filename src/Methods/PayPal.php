@@ -12,7 +12,6 @@
 namespace Juzaweb\Modules\Payment\Methods;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
@@ -42,6 +41,12 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
         )->send();
 
         if (! in_array($response->getCode(), [200, 201])) {
+            Log::error('PayPal Purchase Error: ', [
+                'code' => $response->getCode(),
+                'message' => $response->getMessage(),
+                'data' => $response->getData(),
+                'params' => $params,
+            ]);
             throw new PaymentException(
                 __('Payment gateway error: :message', ['message' => $response->getMessage()])
             );
