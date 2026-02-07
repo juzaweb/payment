@@ -6,7 +6,9 @@ use Juzaweb\Modules\Payment\Http\Controllers\CheckoutController;
 
 Route::post('payment/{module}', [PaymentController::class, 'checkout'])
     ->name('payment.checkout');
-Route::get('order/{orderId}/checkout', [CheckoutController::class, 'orderCheckout'])->name('payment.order.checkout');
+Route::get('order/{orderId}/checkout', [CheckoutController::class, 'orderCheckout'])
+    ->name('payment.order.checkout');
+
 Route::post('payment/{module}/purchase', [PaymentController::class, 'purchase'])
     ->name('payment.purchase');
 Route::get('payment/{module}/return/{paymentHistoryId}', [PaymentController::class, 'return'])
@@ -19,9 +21,12 @@ Route::get('payment/{module}/status/{paymentHistoryId}', [PaymentController::cla
     ->name('payment.status');
 
 Route::post('cart/add', [CartController::class, 'add'])->name('cart.add');
-Route::delete('cart/{itemId}', [CartController::class, 'remove'])->name('cart.remove');
+Route::delete('cart/{itemId}', [CartController::class, 'remove'])
+    ->name('cart.remove');
 
-Route::get('checkout/{module}/{cartId}', [CheckoutController::class, 'index'])->name('checkout');
+Route::get('checkout/{module}/{cartId}', [CheckoutController::class, 'index'])
+    ->name('checkout');
 Route::post('checkout/{module}/{cartId}', [CheckoutController::class, 'index']);
 
-Route::get('invoices/{orderId}', [CheckoutController::class, 'thankyou'])->name('checkout.thankyou');
+Route::get('invoices/{orderId}', [CheckoutController::class, 'thankyou'])
+    ->name('checkout.thankyou');
