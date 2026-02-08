@@ -1,6 +1,7 @@
 {
     "name": "juzaweb/payment",
     "type": "juzaweb-module",
+    "license": "GPL-2.0",
     "description": "Payment Module",
     "authors": [
         {
