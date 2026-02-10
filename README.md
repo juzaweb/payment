@@ -1,5 +1,3 @@
-# Juzaweb Payment Module
-
 A flexible Payment Module for the Juzaweb CMS. This module provides a unified interface for handling multiple payment gateways (PayPal, Stripe) and allows other modules to integrate payment functionalities easily.
 
 ## Features
@@ -11,23 +9,17 @@ A flexible Payment Module for the Juzaweb CMS. This module provides a unified in
 
 ## Installation
 
-1.  **Require the package via Composer:**
+1.  **Install the module:**
 
     ```bash
-    composer require juzaweb/payment
+    php artisan module:install juzaweb/payment
     ```
 
-2.  **Publish the configuration and assets:**
+2.  **Publish the configuration and assets (optional):**
 
     ```bash
     php artisan vendor:publish --tag="payment-config"
     php artisan vendor:publish --tag="payment-module-views"
-    ```
-
-3.  **Run migrations:**
-
-    ```bash
-    php artisan migrate
     ```
 
 ## Configuration
