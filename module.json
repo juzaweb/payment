@@ -1,6 +1,7 @@
 {
     "name": "Payment",
     "alias": "payment",
+    "title": "Payment",
     "description": "",
     "keywords": [],
     "priority": 0,
