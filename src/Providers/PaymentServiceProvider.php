@@ -108,6 +108,7 @@ class PaymentServiceProvider extends ServiceProvider
         Menu::make('orders', function () {
             return [
                 'title' => __('Orders'),
+                'icon' => 'fas fa-shopping-cart'
             ];
         });
 
