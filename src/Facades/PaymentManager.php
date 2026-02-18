@@ -12,6 +12,7 @@ namespace Juzaweb\Modules\Payment\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Juzaweb\Modules\Core\Models\Authenticatable;
+use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Models\PaymentHistory;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
@@ -20,7 +21,7 @@ use Juzaweb\Modules\Payment\Services\PurchaseResult;
 /**
  * @method static PaymentGatewayInterface driver(string $name, array $config = [])
  * @method static void registerDriver(string $name, string $resolver)
- * @method static void registerModule(string $name, array $config = [])
+ * @method static void registerModule(string $name, ModuleHandlerInterface $handler)
  * @method static PurchaseResult create(Authenticatable $user, string $module, string|PaymentGatewayInterface $paymentMethod, string $orderId, array $params)
  * @method static CompleteResult complete(string $module, PaymentHistory $paymentHistory, array $params)
  * @method static bool cancel(string $module, PaymentHistory $paymentHistory, array $params)
