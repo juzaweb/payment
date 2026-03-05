@@ -2,7 +2,6 @@
 
 namespace Juzaweb\Modules\Payment\Tests;
 
-use Juzaweb\Modules\Core\Providers\CoreServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -84,7 +83,7 @@ abstract class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            CoreServiceProvider::class,
+            \Juzaweb\Modules\Core\Providers\CoreServiceProvider::class,
             \Juzaweb\QueryCache\QueryCacheServiceProvider::class,
             \Spatie\Activitylog\ActivitylogServiceProvider::class,
             \Juzaweb\Hooks\HooksServiceProvider::class,
@@ -116,7 +115,7 @@ abstract class TestCase extends Orchestra
             'PageBlock' => \Juzaweb\Modules\Core\Facades\PageBlock::class,
             'Chart' => \Juzaweb\Modules\Core\Facades\Chart::class,
             'DataTables' => \Yajra\DataTables\Facades\DataTables::class,
-            'Menu' => \Yajra\DataTables\Facades\Menu::class,
+            'Menu' => \Juzaweb\Modules\Core\Facades\Menu::class,
         ];
     }
 
