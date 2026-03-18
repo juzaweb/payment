@@ -4,7 +4,6 @@ namespace Juzaweb\Modules\Payment\Http\DataTables;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Juzaweb\Modules\Admin\Traits\OrderableDataTable;
 use Juzaweb\Modules\Core\DataTables\Action;
 use Juzaweb\Modules\Core\DataTables\Column;
 use Juzaweb\Modules\Core\DataTables\DataTable;
@@ -36,7 +35,8 @@ class OrdersDataTable extends DataTable
                 };
 
                 $label = $status?->label() ?? $model->payment_status;
-                return '<span class="badge badge-' . $color . '">' . $label . '</span>';
+
+                return '<span class="badge badge-'.$color.'">'.$label.'</span>';
             }
         );
 
@@ -53,7 +53,8 @@ class OrdersDataTable extends DataTable
                 };
 
                 $label = $status?->label() ?? $model->delivery_status;
-                return '<span class="badge badge-' . $color . '">' . $label . '</span>';
+
+                return '<span class="badge badge-'.$color.'">'.$label.'</span>';
             }
         );
 
@@ -79,7 +80,7 @@ class OrdersDataTable extends DataTable
             Column::make('payment_method_name')->name(__('Payment Method')),
             Column::make('payment_status'),
             Column::make('delivery_status'),
-            Column::createdAt()
+            Column::createdAt(),
         ];
     }
 

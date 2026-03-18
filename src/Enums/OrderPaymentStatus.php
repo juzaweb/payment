@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -24,7 +26,7 @@ enum OrderPaymentStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => __('Pending'),
             self::COMPLETED => __('Paid'),
         };

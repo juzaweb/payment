@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -38,7 +39,7 @@ class CheckoutController extends ThemeController
         $cart->load([
             'items.orderable' => function ($q) {
                 $q->with(['media'])->withTranslation();
-            }
+            },
         ]);
         $user = $request->user();
 
@@ -64,7 +65,7 @@ class CheckoutController extends ThemeController
         $order->load([
             'items.orderable' => function ($q) {
                 $q->with(['media'])->withTranslation();
-            }
+            },
         ]);
 
         $user = $order->creator;
@@ -82,7 +83,7 @@ class CheckoutController extends ThemeController
         $order = Order::findOrFail($orderId);
 
         $order->load([
-            'items.orderable' => fn($q) => $q->withTranslation(),
+            'items.orderable' => fn ($q) => $q->withTranslation(),
         ]);
 
         return view(

@@ -2,11 +2,10 @@
 
 namespace Juzaweb\Modules\Payment\Tests\Feature;
 
-use Juzaweb\Modules\Payment\Tests\TestCase;
+use Illuminate\Support\Str;
 use Juzaweb\Modules\Core\Models\User;
 use Juzaweb\Modules\Payment\Models\Order;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\URL;
+use Juzaweb\Modules\Payment\Tests\TestCase;
 
 class OrderRouteTest extends TestCase
 {
@@ -34,13 +33,13 @@ class OrderRouteTest extends TestCase
         );
 
         $indexUrl = route('admin.orders.index');
-        $createUrl = $indexUrl . '/create';
+        $createUrl = $indexUrl.'/create';
 
         $response = $this->get($createUrl);
         // It returns 405 because it likely matches 'admin.orders.show' (GET {id})
         // and 'create' is treated as ID, but then fails or method handling mismatch.
         // We just want to ensure it's not 200 OK form.
-        $this->assertTrue(in_array($response->status(), [404, 405]), 'Status should be 404 or 405, got ' . $response->status());
+        $this->assertTrue(in_array($response->status(), [404, 405]), 'Status should be 404 or 405, got '.$response->status());
     }
 
     public function test_store_route_does_not_exist()
@@ -58,7 +57,7 @@ class OrderRouteTest extends TestCase
     public function test_edit_route_exists()
     {
         $order = Order::create([
-            'code' => 'ORD-' . Str::random(10),
+            'code' => 'ORD-'.Str::random(10),
             'quantity' => 1,
             'total_price' => 100,
             'total' => 100,
@@ -72,7 +71,7 @@ class OrderRouteTest extends TestCase
     public function test_update_route_exists()
     {
         $order = Order::create([
-            'code' => 'ORD-' . Str::random(10),
+            'code' => 'ORD-'.Str::random(10),
             'quantity' => 1,
             'total_price' => 100,
             'total' => 100,
@@ -90,7 +89,7 @@ class OrderRouteTest extends TestCase
     public function test_destroy_route_not_implemented()
     {
         $order = Order::create([
-            'code' => 'ORD-' . Str::random(10),
+            'code' => 'ORD-'.Str::random(10),
             'quantity' => 1,
             'total_price' => 100,
             'total' => 100,

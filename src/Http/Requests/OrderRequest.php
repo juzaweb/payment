@@ -1,9 +1,10 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
  */
 
@@ -19,8 +20,8 @@ class OrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'payment_status' => ['required', Rule::enum(OrderPaymentStatus::class)],
-			'delivery_status' => ['required', Rule::enum(OrderDeliveryStatus::class)]
-		];
+            'payment_status' => ['required', Rule::enum(OrderPaymentStatus::class)],
+            'delivery_status' => ['required', Rule::enum(OrderDeliveryStatus::class)],
+        ];
     }
 }

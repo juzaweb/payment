@@ -4,8 +4,6 @@ namespace Juzaweb\Modules\Payment\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Juzaweb\Modules\Admin\Models\Website;
 use Juzaweb\Modules\Core\Models\Model;
 use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Core\Traits\Translatable;
@@ -14,7 +12,7 @@ use Juzaweb\Modules\Payment\Facades\PaymentManager;
 
 class PaymentMethod extends Model
 {
-    use HasAPI, Translatable, HasUuids;
+    use HasAPI, HasUuids, Translatable;
 
     protected $table = 'payment_methods';
 

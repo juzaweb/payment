@@ -3,28 +3,35 @@
 namespace Juzaweb\Modules\Payment\Tests\Feature;
 
 use Illuminate\Support\Facades\Request;
-use Juzaweb\Modules\Payment\Tests\TestCase;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Juzaweb\Modules\Core\Http\Middleware\MultipleLanguage;
 use Juzaweb\Modules\Core\Models\User;
-use Juzaweb\Modules\Payment\Models\PaymentMethod;
-use Juzaweb\Modules\Payment\Models\Order;
-use Juzaweb\Modules\Payment\Facades\PaymentManager;
+use Juzaweb\Modules\Core\Translations\Models\Language;
 use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
+use Juzaweb\Modules\Payment\Enums\OrderPaymentStatus;
+use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
+use Juzaweb\Modules\Payment\Facades\PaymentManager;
+use Juzaweb\Modules\Payment\Models\Order;
+use Juzaweb\Modules\Payment\Models\PaymentHistory;
+use Juzaweb\Modules\Payment\Models\PaymentMethod;
+use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PaymentDriverAdapter;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
-use Juzaweb\Modules\Payment\Services\CompleteResult;
+use Juzaweb\Modules\Payment\Tests\TestCase;
 use Mockery;
-use Illuminate\Support\Str;
-use Juzaweb\Modules\Payment\Enums\OrderPaymentStatus;
-use Juzaweb\Modules\Payment\Models\PaymentHistory;
-use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 
 class PaymentRouteTest extends TestCase
 {
     protected $user;
+
     protected $paymentMethod;
+
     protected $order;
+
     protected $moduleHandler;
+
     protected $gateway;
 
     protected function setUp(): void
@@ -33,31 +40,31 @@ class PaymentRouteTest extends TestCase
 
         // Create mix manifest for payment module
         $path = public_path('modules/payment');
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             mkdir($path, 0777, true);
         }
-        if (!file_exists($path . '/mix-manifest.json')) {
-            file_put_contents($path . '/mix-manifest.json', '{}');
+        if (! file_exists($path.'/mix-manifest.json')) {
+            file_put_contents($path.'/mix-manifest.json', '{}');
         }
 
         $this->user = User::factory()->create();
         $this->actingAs($this->user);
 
         // Define currentActor macro if not exists
-        if (!Request::hasMacro('currentActor')) {
+        if (! Request::hasMacro('currentActor')) {
             Request::macro('currentActor', function () {
                 return $this->user();
             });
         }
 
-        if (!\Illuminate\Support\Facades\Schema::hasColumn('languages', 'default')) {
-            \Illuminate\Support\Facades\Schema::table('languages', function ($table) {
+        if (! Schema::hasColumn('languages', 'default')) {
+            Schema::table('languages', function ($table) {
                 $table->boolean('default')->default(false);
             });
         }
 
         // Seed default language
-        $language = \Juzaweb\Modules\Core\Translations\Models\Language::firstOrCreate(
+        $language = Language::firstOrCreate(
             ['code' => 'en'],
             ['name' => 'English']
         );
@@ -68,13 +75,13 @@ class PaymentRouteTest extends TestCase
         app()->setLocale('en');
 
         $this->withoutMiddleware([
-            \Juzaweb\Modules\Core\Http\Middleware\MultipleLanguage::class,
+            MultipleLanguage::class,
         ]);
 
         // Register Test Module
         $this->moduleHandler = Mockery::mock(ModuleHandlerInterface::class);
         $this->moduleHandler->shouldReceive('getReturnUrl')->andReturn('http://example.com/return');
-        $this->moduleHandler->shouldReceive('createOrder')->andReturnUsing(function($params) {
+        $this->moduleHandler->shouldReceive('createOrder')->andReturnUsing(function ($params) {
             return $this->order;
         });
         $this->moduleHandler->shouldReceive('success');
@@ -94,7 +101,7 @@ class PaymentRouteTest extends TestCase
         $driverAdapter->shouldReceive('isReturnInEmbed')->andReturn(false);
         $driverAdapter->shouldReceive('getDriver')->andReturn('TestDriver');
 
-        PaymentManager::registerDriver('TestDriver', fn() => $driverAdapter);
+        PaymentManager::registerDriver('TestDriver', fn () => $driverAdapter);
 
         // Create Payment Method
         $this->paymentMethod = PaymentMethod::create([
@@ -106,7 +113,7 @@ class PaymentRouteTest extends TestCase
 
         // Create Order
         $this->order = Order::create([
-            'code' => 'ORD-' . Str::random(10),
+            'code' => 'ORD-'.Str::random(10),
             'quantity' => 1,
             'total_price' => 100,
             'total' => 100,
@@ -180,7 +187,7 @@ class PaymentRouteTest extends TestCase
 
         $response = $this->getJson(route('payment.return', [
             'module' => 'test_module',
-            'paymentHistoryId' => $paymentHistory->id
+            'paymentHistoryId' => $paymentHistory->id,
         ]));
 
         $response->assertStatus(200);
@@ -188,7 +195,7 @@ class PaymentRouteTest extends TestCase
 
     public function test_cancel_route()
     {
-         $paymentHistory = PaymentHistory::create([
+        $paymentHistory = PaymentHistory::create([
             'method_id' => $this->paymentMethod->id,
             'payment_method' => $this->paymentMethod->driver,
             'module' => 'test_module',
@@ -202,7 +209,7 @@ class PaymentRouteTest extends TestCase
 
         $response = $this->getJson(route('payment.cancel', [
             'module' => 'test_module',
-            'paymentHistoryId' => $paymentHistory->id
+            'paymentHistoryId' => $paymentHistory->id,
         ]));
 
         // Cancel route returns 422 warning response
@@ -229,7 +236,7 @@ class PaymentRouteTest extends TestCase
 
         $response = $this->get(route('payment.embed', [
             'module' => 'test_module',
-            'paymentHistoryId' => $paymentHistory->id
+            'paymentHistoryId' => $paymentHistory->id,
         ]));
 
         $response->assertStatus(200);
@@ -251,7 +258,7 @@ class PaymentRouteTest extends TestCase
 
         $response = $this->getJson(route('payment.status', [
             'module' => 'test_module',
-            'paymentHistoryId' => $paymentHistory->id
+            'paymentHistoryId' => $paymentHistory->id,
         ]));
 
         $response->assertStatus(200);

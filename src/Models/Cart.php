@@ -11,7 +11,7 @@ use Juzaweb\Modules\Core\Traits\UsedInFrontend;
 
 class Cart extends Model
 {
-    use HasAPI, HasUuids,  HasCreator, UsedInFrontend;
+    use HasAPI, HasCreator,  HasUuids, UsedInFrontend;
 
     protected $table = 'carts';
 
@@ -33,13 +33,13 @@ class Cart extends Model
                     $q->cacheFor(3600)->with(['orderable' => function ($q2) {
                         $q2->with(['media'])->cacheFor(3600)->withTranslation();
                     }]);
-                }
+                },
             ]
         );
     }
 
     public function getTotalAmount()
     {
-        return $this->items->sum(fn($item) => $item->orderable->price * $item->quantity);
+        return $this->items->sum(fn ($item) => $item->orderable->price * $item->quantity);
     }
 }

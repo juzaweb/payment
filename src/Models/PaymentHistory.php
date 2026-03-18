@@ -5,7 +5,6 @@ namespace Juzaweb\Modules\Payment\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Juzaweb\Modules\Admin\Models\Website;
 use Juzaweb\Modules\Core\Models\Model;
 use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Payment\Contracts\Paymentable;
@@ -13,7 +12,7 @@ use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 
 class PaymentHistory extends Model
 {
-    use HasUuids, HasAPI;
+    use HasAPI, HasUuids;
 
     protected $table = 'payment_histories';
 
