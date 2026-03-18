@@ -1,9 +1,10 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
  */
 
@@ -18,15 +19,15 @@ class PaymentMethodRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'driver' => [
-                Rule::requiredIf(!$this->route('id')),
-                Rule::in(array_keys(PaymentManager::drivers()))
+            'driver' => [
+                Rule::requiredIf(! $this->route('id')),
+                Rule::in(array_keys(PaymentManager::drivers())),
             ],
-			'name' => ['required', 'string', 'max:200'],
-			'description' => ['nullable', 'string', 'max:500'],
+            'name' => ['required', 'string', 'max:200'],
+            'description' => ['nullable', 'string', 'max:500'],
             'locale' => ['required', 'string', 'max:10', 'exists:languages,code'],
-			'config' => ['required', 'array'],
-			'active' => ['required', 'boolean'],
-		];
+            'config' => ['required', 'array'],
+            'active' => ['required', 'boolean'],
+        ];
     }
 }

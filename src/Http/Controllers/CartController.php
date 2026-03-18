@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -30,7 +31,7 @@ class CartController extends ThemeController
                     $cart = Cart::find($cartId);
                 }
 
-                if (!isset($cart)) {
+                if (! isset($cart)) {
                     $cart = Cart::create([
                         'created_by' => $actor->id,
                         'created_type' => get_class($actor),
@@ -55,7 +56,7 @@ class CartController extends ThemeController
         $item = $cart['item']->load('orderable');
         $cartModel = $cart['cart']->load('items.orderable');
 
-        $subtotal = $cartModel->items->sum(fn($item) => $item->orderable->price * $item->quantity);
+        $subtotal = $cartModel->items->sum(fn ($item) => $item->orderable->price * $item->quantity);
         $itemTotal = $item->orderable->price * $item->quantity;
 
         return $this->success(
@@ -84,13 +85,13 @@ class CartController extends ThemeController
 
         $cart = Cart::find($cartId);
 
-        if (!$cart) {
+        if (! $cart) {
             return $this->error(__('Cart not found'));
         }
 
         $item = $cart->items()->where('id', $itemId)->first();
 
-        if (!$item) {
+        if (! $item) {
             return $this->error(__('Item not found in cart'));
         }
 

@@ -1,8 +1,8 @@
 <?php
 
-use Juzaweb\Modules\Payment\Http\Controllers\PaymentController;
 use Juzaweb\Modules\Payment\Http\Controllers\CartController;
 use Juzaweb\Modules\Payment\Http\Controllers\CheckoutController;
+use Juzaweb\Modules\Payment\Http\Controllers\PaymentController;
 
 Route::post('payment/{module}', [PaymentController::class, 'checkout'])
     ->name('payment.checkout');

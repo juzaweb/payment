@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -28,12 +29,13 @@ class OrderableExists implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!class_exists($this->orderableType)) {
+        if (! class_exists($this->orderableType)) {
             $fail(trans('ecommerce::validation.orderable_type_invalid'));
+
             return;
         }
 
-        if (!$this->orderableType::where('id', $value)->exists()) {
+        if (! $this->orderableType::where('id', $value)->exists()) {
             $fail(trans('ecommerce::validation.orderable_not_found'));
         }
     }

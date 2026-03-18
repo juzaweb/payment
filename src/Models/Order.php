@@ -17,7 +17,7 @@ use Juzaweb\Modules\Payment\Enums\OrderPaymentStatus;
 
 class Order extends Model implements Paymentable
 {
-    use HasAPI, HasCodeWithMonth, HasUuids,  HasCreator;
+    use HasAPI, HasCodeWithMonth, HasCreator,  HasUuids;
 
     protected $table = 'orders';
 

@@ -36,7 +36,7 @@ class PaymentController extends ThemeController
             ->where('active', true)
             ->first();
 
-        if (!$method) {
+        if (! $method) {
             return $this->error(__('Payment method not found!'));
         }
 
@@ -247,6 +247,7 @@ class PaymentController extends ThemeController
             );
         } catch (PaymentException $e) {
             report($e);
+
             return response(
                 [
                     'message' => $e->getMessage(),

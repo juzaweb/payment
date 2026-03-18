@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -56,7 +57,7 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
             $response->getTransactionReference(),
             $response->getRedirectUrl(),
             $response->getData()
-        )->setSuccessful($response->isSuccessful() && !$response->isRedirect());
+        )->setSuccessful($response->isSuccessful() && ! $response->isRedirect());
     }
 
     public function complete(array $params): CompleteResult
@@ -75,12 +76,13 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
     {
         $payload = json_decode($request->getContent(), true);
 
-        if (!is_array($payload) || empty($payload['event_type'])) {
+        if (! is_array($payload) || empty($payload['event_type'])) {
             return null;
         }
 
-        if (!$this->verifyWebhookSignature($request, $payload)) {
+        if (! $this->verifyWebhookSignature($request, $payload)) {
             Log::error('PayPal Signature Verification Failed');
+
             return null;
         }
 
@@ -126,8 +128,9 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
             $tokenRequest->initialize($gateway->getParameters());
             $response = $tokenRequest->send();
 
-            if (!$response->isSuccessful()) {
-                Log::error('PayPal Token Error: ' . $response->getMessage());
+            if (! $response->isSuccessful()) {
+                Log::error('PayPal Token Error: '.$response->getMessage());
+
                 return false;
             }
 
@@ -140,7 +143,7 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
                 'transmission_sig' => $request->header('PAYPAL-TRANSMISSION-SIG'),
                 'transmission_time' => $request->header('PAYPAL-TRANSMISSION-TIME'),
                 'webhook_id' => $webhookId,
-                'webhook_event' => $payload
+                'webhook_event' => $payload,
             ];
 
             $apiUrl = $isSandbox
@@ -152,12 +155,14 @@ class PayPal extends PaymentGateway implements PaymentGatewayInterface
 
             if ($verifyResponse->successful()) {
                 $data = $verifyResponse->json();
+
                 return isset($data['verification_status']) && $data['verification_status'] === 'SUCCESS';
             }
 
-            Log::error('PayPal Verify Error: ' . $verifyResponse->body());
+            Log::error('PayPal Verify Error: '.$verifyResponse->body());
         } catch (\Exception $e) {
-            Log::error('PayPal Webhook Exception: ' . $e->getMessage());
+            Log::error('PayPal Webhook Exception: '.$e->getMessage());
+
             return false;
         }
 

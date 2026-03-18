@@ -2,25 +2,28 @@
 
 namespace Juzaweb\Modules\Payment\Tests\Feature;
 
-use Juzaweb\Modules\Payment\Tests\TestCase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Juzaweb\Modules\Core\Models\User;
 use Juzaweb\Modules\Payment\Models\PaymentMethod;
+use Juzaweb\Modules\Payment\Tests\TestCase;
 
 class MethodControllerTest extends TestCase
 {
     protected $user;
+
     protected $baseUrl = 'admin/payment-methods';
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+        Gate::before(function ($user, $ability) {
             return $user->isSuperAdmin() ? true : null;
         });
 
         // Ensure language exists
-        \Illuminate\Support\Facades\DB::table('languages')->insertOrIgnore([
+        DB::table('languages')->insertOrIgnore([
             'code' => 'en',
             'name' => 'English',
             'created_at' => now(),
@@ -41,7 +44,7 @@ class MethodControllerTest extends TestCase
         $this->actingAs($this->user);
     }
 
-    public function testIndex()
+    public function test_index()
     {
         $response = $this->get($this->baseUrl);
 
@@ -49,15 +52,15 @@ class MethodControllerTest extends TestCase
         $response->assertSee('Payment Methods');
     }
 
-    public function testCreate()
+    public function test_create()
     {
-        $response = $this->get($this->baseUrl . '/create?locale=en&current_locale=en');
+        $response = $this->get($this->baseUrl.'/create?locale=en&current_locale=en');
 
         $response->assertStatus(200);
         $response->assertSee('Create Payment Method');
     }
 
-    public function testStore()
+    public function test_store()
     {
         $response = $this->post($this->baseUrl, [
             'name' => 'Test Method',
@@ -71,7 +74,7 @@ class MethodControllerTest extends TestCase
         $this->assertDatabaseHas('payment_method_translations', ['name' => 'Test Method']);
     }
 
-    public function testEdit()
+    public function test_edit()
     {
         $method = new PaymentMethod([
             'driver' => 'PayPal',
@@ -81,13 +84,13 @@ class MethodControllerTest extends TestCase
         $method->setAttribute('name', 'Edit Method');
         $method->save();
 
-        $response = $this->get($this->baseUrl . "/{$method->id}/edit?locale=en&current_locale=en");
+        $response = $this->get($this->baseUrl."/{$method->id}/edit?locale=en&current_locale=en");
 
         $response->assertStatus(200);
         $response->assertSee('Edit Payment Method');
     }
 
-    public function testUpdate()
+    public function test_update()
     {
         $method = new PaymentMethod([
             'driver' => 'PayPal',
@@ -97,7 +100,7 @@ class MethodControllerTest extends TestCase
         $method->setAttribute('name', 'Update Method');
         $method->save();
 
-        $response = $this->put($this->baseUrl . "/{$method->id}", [
+        $response = $this->put($this->baseUrl."/{$method->id}", [
             'name' => 'Updated Method',
             'driver' => 'PayPal',
             'locale' => 'en',
@@ -109,9 +112,9 @@ class MethodControllerTest extends TestCase
         $this->assertDatabaseHas('payment_method_translations', ['name' => 'Updated Method']);
     }
 
-    public function testGetData()
+    public function test_get_data()
     {
-        $response = $this->get($this->baseUrl . '/PayPal/get-data');
+        $response = $this->get($this->baseUrl.'/PayPal/get-data');
 
         $response->assertStatus(200);
     }

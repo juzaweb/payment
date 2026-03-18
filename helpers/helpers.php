@@ -3,12 +3,11 @@
 use Illuminate\Support\Facades\Cookie;
 use Juzaweb\Modules\Payment\Models\Cart;
 
-if (!function_exists('find_or_create_cart')) {
+if (! function_exists('find_or_create_cart')) {
     /**
      * Find or create a cart for the current actor.
      *
-     * @param string|null $cartId The cart ID from cookie.
-     * @return Cart
+     * @param  string|null  $cartId  The cart ID from cookie.
      */
     function find_or_create_cart(?string $cartId = null): Cart
     {
@@ -32,17 +31,15 @@ if (!function_exists('find_or_create_cart')) {
     }
 }
 
-if (!function_exists('get_cart')) {
+if (! function_exists('get_cart')) {
     /**
      * Get the current cart from cookie.
-     *
-     * @return Cart|null
      */
     function get_cart(): ?Cart
     {
         $cartId = Cookie::get('cart_id');
 
-        if (!$cartId) {
+        if (! $cartId) {
             return null;
         }
 
@@ -53,9 +50,7 @@ if (!function_exists('get_cart')) {
 /**
  * Format price with currency symbol
  *
- * @param float|null $price
- * @param string $currency Currency code (default: USD)
- * @return string
+ * @param  string  $currency  Currency code (default: USD)
  */
 function format_price(?float $price, string $currency = 'USD'): string
 {
@@ -72,13 +67,13 @@ function format_price(?float $price, string $currency = 'USD'): string
         'VND' => '₫',
     ];
 
-    $symbol = $symbols[$currency] ?? $currency . ' ';
+    $symbol = $symbols[$currency] ?? $currency.' ';
 
     // Format based on currency
     if ($currency === 'VND') {
-        return number_format($price, 0, '.', ',') . $symbol;
+        return number_format($price, 0, '.', ',').$symbol;
     }
 
     // Default format for USD, EUR, etc.
-    return $symbol . number_format($price, 2, '.', ',');
+    return $symbol.number_format($price, 2, '.', ',');
 }

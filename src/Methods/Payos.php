@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -22,9 +24,7 @@ class Payos extends PaymentGateway implements PaymentGatewayInterface
 {
     protected bool $returnInEmbed = true;
 
-    public function __construct(protected array $config)
-    {
-    }
+    public function __construct(protected array $config) {}
 
     public function purchase(array $params): PurchaseResult
     {
@@ -38,7 +38,7 @@ class Payos extends PaymentGateway implements PaymentGatewayInterface
 
         return PurchaseResult::make(
             $response->getTransactionReference(),
-            $response->getRedirectUrl() . '/?embedded=true',
+            $response->getRedirectUrl().'/?embedded=true',
             $response->getData()
         );
     }
@@ -80,6 +80,7 @@ class Payos extends PaymentGateway implements PaymentGatewayInterface
         if (isset($this->config['sandbox']) && $this->config['sandbox']) {
             $gateway->setTestMode(true);
         }
+
         return $gateway;
     }
 }

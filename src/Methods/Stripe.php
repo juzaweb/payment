@@ -3,16 +3,16 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
 namespace Juzaweb\Modules\Payment\Methods;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Services\CompleteResult;
@@ -55,14 +55,14 @@ class Stripe extends PaymentGateway implements PaymentGatewayInterface
                 $paymentIntentId,
                 $confirmResponse->getRedirectUrl(),
                 $confirmResponse->getData()
-            )->setSuccessful($confirmResponse->isSuccessful() && !$confirmResponse->isRedirect());
+            )->setSuccessful($confirmResponse->isSuccessful() && ! $confirmResponse->isRedirect());
         }
 
         return PurchaseResult::make(
             $response->getTransactionReference(),
             $response->getRedirectUrl(),
             $response->getData()
-        )->setSuccessful($response->isSuccessful() && !$response->isRedirect());
+        )->setSuccessful($response->isSuccessful() && ! $response->isRedirect());
     }
 
     public function complete(array $params): CompleteResult

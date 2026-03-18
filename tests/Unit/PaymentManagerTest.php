@@ -3,13 +3,12 @@
 namespace Juzaweb\Modules\Payment\Tests\Unit;
 
 use Illuminate\Support\Facades\Event;
+use Juzaweb\Modules\Admin\Models\User;
 use Juzaweb\Modules\Payment\Contracts\ModuleHandlerInterface;
 use Juzaweb\Modules\Payment\Contracts\PaymentGatewayInterface;
 use Juzaweb\Modules\Payment\Contracts\PaymentManager;
-use Juzaweb\Modules\Payment\Contracts\Paymentable;
 use Juzaweb\Modules\Payment\Enums\PaymentHistoryStatus;
 use Juzaweb\Modules\Payment\Events\PaymentCancel;
-use Juzaweb\Modules\Payment\Events\PaymentFail;
 use Juzaweb\Modules\Payment\Events\PaymentSuccess;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Payment\Models\Order;
@@ -19,7 +18,6 @@ use Juzaweb\Modules\Payment\Services\CompleteResult;
 use Juzaweb\Modules\Payment\Services\PurchaseResult;
 use Juzaweb\Modules\Payment\Tests\TestCase;
 use Mockery;
-use Juzaweb\Modules\Admin\Models\User;
 
 class PaymentManagerTest extends TestCase
 {
@@ -233,8 +231,8 @@ class PaymentManagerTest extends TestCase
         Event::fake();
         $manager = app(PaymentManager::class);
 
-         // Create User & Order
-         $user = User::create([
+        // Create User & Order
+        $user = User::create([
             'name' => 'Test User 3',
             'email' => 'test3@example.com',
             'password' => bcrypt('password'),

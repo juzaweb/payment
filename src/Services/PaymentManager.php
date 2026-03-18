@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -42,7 +43,7 @@ class PaymentManager implements Contracts\PaymentManager
         // Get existing order
         $order = Order::findOrFail($orderId);
 
-        if (!$paymentMethod instanceof PaymentMethod) {
+        if (! $paymentMethod instanceof PaymentMethod) {
             $paymentMethod = PaymentMethod::where('driver', $paymentMethod)
                 ->where('active', true)
                 ->first();
@@ -165,7 +166,7 @@ class PaymentManager implements Contracts\PaymentManager
     public function drivers(): array
     {
         return collect(array_keys($this->drivers))
-            ->mapWithKeys(fn($driver) => [
+            ->mapWithKeys(fn ($driver) => [
                 $driver => title_from_key($driver),
             ])
             ->all();
@@ -183,7 +184,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     public function config(string $driver): array
     {
-        if (!isset($this->drivers[$driver])) {
+        if (! isset($this->drivers[$driver])) {
             throw new PaymentException("Payment driver [$driver] not registered.");
         }
 
@@ -192,7 +193,7 @@ class PaymentManager implements Contracts\PaymentManager
 
     public function driverAdapter(string $name): PaymentDriverAdapter
     {
-        if (!isset($this->drivers[$name])) {
+        if (! isset($this->drivers[$name])) {
             throw new PaymentException("Payment driver [$name] not registered.");
         }
 
@@ -214,9 +215,9 @@ class PaymentManager implements Contracts\PaymentManager
         )->render();
     }
 
-    public function module(string $module): Contracts\ModuleHandlerInterface
+    public function module(string $module): ModuleHandlerInterface
     {
-        if (!isset($this->modules[$module])) {
+        if (! isset($this->modules[$module])) {
             throw new PaymentException("Payment module [$module] not registered.");
         }
 
